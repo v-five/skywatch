@@ -1,0 +1,18 @@
+{
+  "name": "v-five",
+  "owner": {
+    "name": "v-five",
+    "url": "https://github.com/v-five"
+  },
+  "metadata": {
+    "description": "v-five's Claude Code mods."
+  },
+  "plugins": [
+    {
+      "name": "skywatch",
+      "displayName": "SkyWatch",
+      "source": "./claude-code",
+      "description": "A starbase for your Claude Code session: a hazard scale for the context above the prompt, and a pane with the bridge's readings, shields that hold or block risky commands by your directives, a card per shuttle, the mission's totals and a black box."
+    }
+  ]
+}

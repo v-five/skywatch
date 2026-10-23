@@ -1,0 +1,17 @@
+{
+  "name": "skywatch-dev",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "typecheck": "tsc -p claude-code",
+    "check": "biome check . && tsc -p claude-code",
+    "test": "claude plugin test claude-code",
+    "validate": "sh scripts/validate-snapshot.sh | diff scripts/validate-baseline.txt -"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.2",
+    "typescript": "7.0.2"
+  }
+}

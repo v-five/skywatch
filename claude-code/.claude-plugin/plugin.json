@@ -1,0 +1,56 @@
+{
+  "name": "skywatch",
+  "displayName": "SkyWatch",
+  "version": "0.31.5",
+  "description": "A starbase for your Claude Code session: a hazard scale for the context above the prompt, and a pane with the bridge's readings, shields that hold or block risky commands by your directives, a card per shuttle, the mission's totals and a black box.",
+  "author": {
+    "name": "v-five",
+    "url": "https://github.com/v-five"
+  },
+  "homepage": "https://github.com/v-five/skywatch/tree/main/claude-code",
+  "repository": "https://github.com/v-five/skywatch",
+  "license": "Apache-2.0",
+  "keywords": [
+    "claude-code",
+    "claude-code-mod",
+    "claude-code-plugin",
+    "dashboard",
+    "context",
+    "permissions",
+    "subagents",
+    "observability",
+    "sci-fi"
+  ],
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "modules": {
+      "title": "Modules",
+      "description": "Comma-separated modules in display order: bridge, council, shields, shuttles, probes, mission, blackbox. Leave one out to hide it.",
+      "type": "string",
+      "default": "bridge,council,shields,shuttles,probes,mission,blackbox"
+    },
+    "decks": {
+      "title": "Decks",
+      "description": "Comma-separated Shields decks: file, git, shell, web, agents, app, mcp. A call lands in the first that matches; other takes the rest and is always shown.",
+      "type": "string",
+      "default": "file,shell,other"
+    },
+    "autoLaunch": {
+      "title": "Auto launch",
+      "description": "Launch the pane when a session starts",
+      "type": "boolean",
+      "default": true
+    },
+    "hazards": {
+      "title": "Hazards",
+      "description": "The hazard scale. viewscreen: a band above the prompt with the last jump; beacon: one short status entry; off: neither. /skywatch hazards changes it for one session.",
+      "type": "string",
+      "options": [
+        "viewscreen",
+        "beacon",
+        "off"
+      ],
+      "default": "beacon"
+    }
+  }
+}
