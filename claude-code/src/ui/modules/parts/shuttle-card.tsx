@@ -1,6 +1,6 @@
 import type { RenderNode } from 'claude-code'
 import type { Shuttle } from '../../../../types'
-import { kTokens, prettyModel, shorten } from '../../../core'
+import { kTokens, prettyModel, relativePaths, shorten } from '../../../core'
 import { isEffort, shuttleName } from '../../../domain'
 import type { UiContext } from '../../context'
 import { Blank, Border, Row, RowBlock, Ruler, Sep } from '../../layout'
@@ -106,7 +106,7 @@ function CardReading({ ui, shuttle }: CardProps): RenderNode {
           <Fold
             ui={ui}
             foldKey={`answer-${shuttle.id}`}
-            text={shuttle.answer}
+            text={relativePaths(shuttle.answer, ui.places)}
             width={ui.width - FRAME_INSET - LABEL_WIDTH}
             color={COLORS.text}
           />

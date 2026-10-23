@@ -1,5 +1,5 @@
 import type { RenderNode } from 'claude-code'
-import { capitalize, fmtClock, lineCost } from '../../core'
+import { capitalize, fmtClock, lineCost, relativePaths } from '../../core'
 import { BLACKBOX_PAGE, type KeyedEntry, keyedEntries } from '../../domain'
 import type { ModuleProps, ModuleView, UiContext } from '../context'
 import { ModuleFrame } from '../frame'
@@ -32,7 +32,7 @@ function Entry({ ui, keyed }: { ui: UiContext; keyed: KeyedEntry }): RenderNode 
         <Fold
           ui={ui}
           foldKey={keyed.foldKey}
-          text={entry.text}
+          text={relativePaths(entry.text, ui.places)}
           width={textWidth}
           color={entry.kind === 'error' ? COLORS.alert : COLORS.text}
         />

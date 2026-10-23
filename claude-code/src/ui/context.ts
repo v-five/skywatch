@@ -1,6 +1,6 @@
 import type { ElementTable, RenderNode, RenderSurface } from 'claude-code'
 import type { BlackboxEntry, Bridge, Council, Jump, LastJump, Probe, SessionTotals, Shields, Shuttle, Usage, View } from '../../types'
-import type { Config } from '../core'
+import type { Config, Places } from '../core'
 import type { PaneActions } from '../domain'
 import type { ActiveHold } from '../forcefield'
 import { hazardOf } from './hazard'
@@ -19,6 +19,8 @@ export type UiContext = DrawContext & {
   readonly hazardColor: string
   readonly view: View
   readonly actions: PaneActions
+  /** Where paths in free text, such as a debrief, read relative from. */
+  readonly places: Places
 }
 
 /** The session's readings, as the pane draws them. */
@@ -58,6 +60,7 @@ export function uiContext(pane: {
   view: View
   actions: PaneActions
   canAnimate: boolean
+  places: Places
 }): UiContext {
   return {
     ...drawContext(pane.els, pane.canAnimate),
@@ -67,5 +70,6 @@ export function uiContext(pane: {
     hazardColor: pane.usage.pct !== null ? hazardOf(pane.usage.pct).color : COLORS.bridge,
     view: pane.view,
     actions: pane.actions,
+    places: pane.places,
   }
 }

@@ -1,5 +1,5 @@
 import type { RenderSurface } from 'claude-code'
-import type { Config } from '../core'
+import { type Config, NO_PLACES, type Places } from '../core'
 import { type ActiveHold, DEFAULT_DIRECTIVES, type DirectiveSet, type Held, isActiveHold } from '../forcefield'
 
 /** What one load of the mod keeps in memory: none of it is state the pane must find after a reload. */
@@ -12,6 +12,8 @@ export type Runtime = {
   modeSeen: string | null
   /** Measured risky calls by tool_use_id, until they settle. */
   readonly held: Map<string, Held>
+  /** Where paths read relative from: the session's folder and home, once the session has started. */
+  places: Places
   /** A client module failed in this load: drawings leave client modules out until a reload. */
   hasClientFault: boolean
 }
@@ -23,6 +25,7 @@ export function createRuntime(config: Config): Runtime {
     directives: { directives: [...DEFAULT_DIRECTIVES], errors: [] },
     modeSeen: null,
     held: new Map(),
+    places: NO_PLACES,
     hasClientFault: false,
   }
 }

@@ -1,12 +1,14 @@
 import type { EngineInterface, On } from 'claude-code'
 import { usageFrom, withCommand } from '../domain'
-import { loadDirectives } from '../forcefield'
+import { homeFolder, loadDirectives } from '../forcefield'
 import { loadTotals, migrateState, patchBridge, patchUsage, readUsage, recordUsage, resetAll } from '../state'
 import type { Runtime } from './runtime'
 import { openPane, refreshStatus, remeasure } from './status'
 
 async function startSession($: EngineInterface, runtime: Runtime): Promise<void> {
   runtime.directives = await loadDirectives($).catch(() => runtime.directives)
+  const [cwd, home] = await Promise.all([$.session.cwd().catch(() => ''), homeFolder($)])
+  runtime.places = { cwd, home }
   await $.command.register({
     name: 'skywatch',
     description: 'SkyWatch, a starbase for your session: launch, dock, recalibrate, hazards, directives',

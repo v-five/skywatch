@@ -45,6 +45,7 @@ async function paneContext($: EngineInterface, runtime: Runtime, pane: PaneReque
     view,
     actions: paneActions($),
     canAnimate: !runtime.hasClientFault,
+    places: runtime.places,
   })
   const data: PaneData = {
     config: runtime.config,

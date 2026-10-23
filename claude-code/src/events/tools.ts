@@ -47,7 +47,7 @@ async function recordVerdict(
     deck: deckOf(e.tool, e.input, runtime.config.decks),
     verdict: checkVerdict(decision, blockedBy !== null),
     inSubagent: Boolean(e.agentId),
-    detail: shorten(describeInput(e.tool, e.input), CHECK_DETAIL_MAX),
+    detail: shorten(describeInput(e.tool, e.input, runtime.places), CHECK_DETAIL_MAX),
     at: await $.clock.now(),
   }
   await patchShields($, shields => recordCheck(shields, check))
@@ -70,7 +70,7 @@ async function markAsked($: EngineInterface, runtime: Runtime, id: string, held:
 
 /** Measures a risky call before it runs, so tool.check can put it to the prompt. */
 async function holdCall($: EngineInterface, runtime: Runtime, e: Args<'tool.call'>): Promise<void> {
-  const draft = await holdFor($, { tool: e.tool, input: e }, runtime.directives.directives)
+  const draft = await holdFor($, { tool: e.tool, input: e, places: runtime.places }, runtime.directives.directives)
   if (draft) runtime.held.set(e.tool_use_id, { ...draft, who: await whoIs($, e.agentId) })
 }
 
@@ -111,14 +111,14 @@ async function noteHandback($: EngineInterface, e: Args<'tool.call'>): Promise<v
 }
 
 /** The jump's edits and errors, the shuttle's last tools, and the black box's refusals, errors and edits. */
-async function recordOutcome($: EngineInterface, e: Args<'tool.call'>, ran: CallResult, didRun: boolean): Promise<void> {
+async function recordOutcome($: EngineInterface, runtime: Runtime, e: Args<'tool.call'>, ran: CallResult, didRun: boolean): Promise<void> {
   const hasFailed = didRun && ran.isError === true
   const isEdit = !hasFailed && didRun && EDIT_TOOLS.has(e.tool)
   const isStopped = ran.deny !== undefined
   if (isEdit || hasFailed || (!e.agentId && (await getJump($)).errorStreak > 0)) {
     await patchJump($, jump => afterCall(jump, { inSubagent: Boolean(e.agentId), hasFailed, isEdit }))
   }
-  const text = shorten(describeInput(e.tool, e), CALL_TEXT_MAX)
+  const text = shorten(describeInput(e.tool, e, runtime.places), CALL_TEXT_MAX)
   const { agentId } = e
   if (agentId) {
     await patchShuttles($, fleet =>
@@ -137,7 +137,7 @@ async function afterToolCall($: EngineInterface, runtime: Runtime, e: Args<'tool
   await settleHeld($, runtime, e, didRun)
   const isSettled = await settleAsk($, e.tool_use_id, didRun)
   if (isHandback) await noteHandback($, e)
-  else if (e.tool !== 'Agent') await recordOutcome($, e, ran, didRun)
+  else if (e.tool !== 'Agent') await recordOutcome($, runtime, e, ran, didRun)
   if (!isHandback && (isSettled || (!didRun && e.tool !== 'Agent'))) await refreshStatus($, runtime)
 }
 
@@ -155,7 +155,7 @@ export function registerTools(on: On, runtime: Runtime): void {
   })
 
   on('tool.call', async ($, e, next) => {
-    if (String(e.tool) !== HANDBACK_TOOL) await bestEffort(noteCall($, e.agentId, e.tool, e))
+    if (String(e.tool) !== HANDBACK_TOOL) await bestEffort(noteCall($, e.agentId, { tool: e.tool, input: e, places: runtime.places }))
     await bestEffort(holdCall($, runtime, e))
     let ran: CallResult | undefined
     try {

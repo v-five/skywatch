@@ -5,7 +5,7 @@ import { LOOKUP_TIMEOUT_MS } from './process'
 /** Prints the home folder, where the person's directives file lives. */
 export const HOME_SCRIPT = 'printf %s "$HOME"'
 
-async function homeFolder($: EngineInterface): Promise<string> {
+export async function homeFolder($: EngineInterface): Promise<string> {
   return $.process
     .run(['bash', '-c', HOME_SCRIPT], { timeoutMs: LOOKUP_TIMEOUT_MS })
     .then(run => run.stdout.trim())

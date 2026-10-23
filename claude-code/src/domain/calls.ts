@@ -1,4 +1,16 @@
-import { baseName, capitalize, isRecord, listOf, redact, shorten, stringOf } from '../core'
+import {
+  baseName,
+  capitalize,
+  isRecord,
+  listOf,
+  NO_PLACES,
+  type Places,
+  redact,
+  relativePaths,
+  shorten,
+  shortPath,
+  stringOf,
+} from '../core'
 
 export const EDIT_TOOLS: ReadonlySet<string> = new Set(['Edit', 'Write', 'NotebookEdit'])
 export const SHELL_TOOLS: ReadonlySet<string> = new Set(['Bash', 'PowerShell'])
@@ -38,10 +50,11 @@ function firstString(...values: unknown[]): string {
 }
 
 /** One line saying what a call was about: its command, path or pattern; redacted. */
-export function describeInput(tool: string, input: unknown): string {
+export function describeInput(tool: string, input: unknown, places: Places = NO_PLACES): string {
   const call = isRecord(input) ? input : {}
-  const path = typeof call.file_path === 'string' ? call.file_path.split(/[\\/]/).slice(-2).join('/') : ''
-  const what = typeof call.command === 'string' ? call.command : path || firstString(call.pattern, call.url, call.description)
+  const path = typeof call.file_path === 'string' ? shortPath(call.file_path, places) : ''
+  const what =
+    typeof call.command === 'string' ? relativePaths(call.command, places) : path || firstString(call.pattern, call.url, call.description)
   return redact(what ? `${toolName(tool)} → ${what}` : toolName(tool))
 }
 

@@ -1,5 +1,5 @@
 import type { EngineInterface } from 'claude-code'
-import { plural, shorten } from '../core'
+import { type Places, plural, relativePaths, shorten } from '../core'
 import { commandOf, describeInput, READ_TOOLS, SHELL_TOOLS } from '../domain'
 import { classifyAll } from './classify'
 import { type Directive, directiveFor, directiveLine, isGroupTarget } from './directives'
@@ -11,7 +11,7 @@ import { secretFileOf } from './secrets'
 const HEADLINE_MAX = 70
 const COMMAND_SUMMARY_MAX = 60
 
-type CallFacts = { readonly tool: string; readonly input: unknown }
+type CallFacts = { readonly tool: string; readonly input: unknown; readonly places: Places }
 
 function partOf(risk: Risk): string {
   if (risk.kind === 'rm') return `${risk.label} ${risk.targets.join(' ')}`
@@ -68,7 +68,7 @@ export async function holdFor($: EngineInterface, call: CallFacts, directives: r
   if (!directive || directive.mode === 'pass') return null
   const secretLine = secret ? `${secretVerb(call.tool)} ${secret}, which may hold secrets` : ''
   const draft: HoldDraft = {
-    headline: shorten(command || describeInput(call.tool, call.input), HEADLINE_MAX),
+    headline: shorten(relativePaths(command, call.places) || describeInput(call.tool, call.input, call.places), HEADLINE_MAX),
     since: null,
     ...plainMeasure(secretLine || `run ${shorten(command, COMMAND_SUMMARY_MAX)}, which a directive covers`),
     mode: directive.mode,
