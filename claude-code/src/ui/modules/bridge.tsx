@@ -3,9 +3,8 @@ import { fmtSpeed, kTokens, prettyModel } from '../../core'
 import { avgSpeed, isEffort } from '../../domain'
 import type { ModuleProps, ModuleView } from '../context'
 import { ModuleFrame } from '../frame'
-import { Row, RowBlock, Ruler, Sep } from '../layout'
-import { FRAME_INSET, LABEL_WIDTH } from '../metrics'
-import { Bar, Effort, Fold } from '../widgets'
+import { Row, Ruler, Sep } from '../layout'
+import { Bar, Effort } from '../widgets'
 import { FlightPaths } from './parts'
 
 /** The state glyph is wider than a cell on some surfaces. */
@@ -73,9 +72,9 @@ function Scanning({ ui, data }: ModuleProps): RenderNode | null {
         </Text>
       </Row>
       {bridge.isRunning && title && bridge.doing ? (
-        <RowBlock ui={ui} label="">
-          <Fold ui={ui} foldKey="doing-bridge" text={bridge.doing} width={ui.width - FRAME_INSET - LABEL_WIDTH} isDim />
-        </RowBlock>
+        <Row ui={ui} label="">
+          <Text dimColor>{bridge.doing}</Text>
+        </Row>
       ) : null}
     </Box>
   )
@@ -85,14 +84,19 @@ function Fleet({ ui, data }: ModuleProps): RenderNode | null {
   const { Box, Text } = ui.els
   if (data.fleet.length === 0) return null
   const running = data.fleet.filter(shuttle => shuttle.status === 'running').length
+  const docked = data.fleet.filter(shuttle => shuttle.status === 'done').length
+  const lost = data.fleet.length - running - docked
+  // With none in flight the flight paths only repeat what the cards say: one line is enough.
   return (
     <Box flexDirection="column">
       <Ruler ui={ui} />
       <Row ui={ui} label="Shuttles">
-        <Text color={running > 0 ? ui.colors.shuttles : ui.colors.dim}>{`${running > 0 ? '◐' : '○'} ${running} in flight`}</Text>
-        <Text dimColor>{` · ${data.fleet.length} total`}</Text>
+        {running > 0 ? <Text color={ui.colors.shuttles}>{`◐ ${running} in flight`}</Text> : null}
+        {running > 0 ? <Text dimColor>{` · ${data.fleet.length} total`}</Text> : null}
+        {running === 0 ? <Text color={ui.colors.dim}>{`○ ${docked} docked`}</Text> : null}
+        {running === 0 && lost > 0 ? <Text dimColor>{` · ${lost} lost`}</Text> : null}
       </Row>
-      <FlightPaths ui={ui} data={data} />
+      {running > 0 ? <FlightPaths ui={ui} data={data} /> : null}
     </Box>
   )
 }

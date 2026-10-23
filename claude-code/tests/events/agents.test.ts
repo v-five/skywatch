@@ -18,6 +18,10 @@ describe('agents: shuttles', () => {
     expect(await docked.find({ type: 'Text', text: '✓ docked' })).toBeDefined()
     expect(await docked.find({ type: 'Text', text: /^done · / })).toBeDefined()
     await docked.unmount()
+    const desktop = await $.ui.mount(paneRequest('desktop'))
+    expect(await desktop.find({ type: 'Text', text: '○ 1 docked' })).toBeDefined()
+    expect(await desktop.findAll({ type: 'Svg' })).toEqual([])
+    await desktop.unmount()
   })
 
   test('a shuttle writes under one name, from its spawn to its landing', async ($, on) => {

@@ -94,7 +94,7 @@ function MissionModule(props: ModuleProps): RenderNode {
   const { ui, data } = props
   const { Text } = ui.els
   return (
-    <ModuleFrame ui={ui} title="✧ Mission" color={ui.colors.dim} isActive={data.bridge.isRunning}>
+    <ModuleFrame ui={ui} title="✧ Mission" color={ui.colors.dim}>
       <Totals {...props} />
       <Jumps {...props} />
       {data.jump.isReviewing ? <Text color={ui.colors.council}>{'architect reviewing before done (inferred)'}</Text> : null}
