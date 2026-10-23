@@ -1,63 +1,96 @@
 import type { RenderNode } from 'claude-code'
-import type { Check, Deck, Shields } from '../../../types'
+import type { Check, Deck, Shields, Verdict } from '../../../types'
 import { shieldsSummary, tallyTotal, ZERO_TALLY } from '../../domain'
 import type { ModuleProps, ModuleView, UiContext } from '../context'
 import { ModuleFrame } from '../frame'
 import { Row, Ruler, Sep } from '../layout'
 import { DECK_KEYS, FRAME_INSET, LABEL_WIDTH } from '../metrics'
 import { VERDICT_STYLE } from '../theme'
-import { Tally } from '../widgets'
+import { shareCells, Tally } from '../widgets'
 import { HeldCall } from './parts'
 
-const SENSORS_MIN = 8
+/** The sensors bar's cells: every check so far, shared by verdict. */
+const SENSORS_WIDTH = 20
+const VERDICTS: readonly Verdict[] = ['rule', 'cleared', 'ask', 'refused', 'deny', 'blocked']
+const OTHER_TOOLS_SHOWN = 3
 const DECK_CHECKS_SHOWN = 5
 /** The longest verdict word and a space, so the details line up. */
 const VERDICT_WORD_WIDTH = Math.max(...Object.values(VERDICT_STYLE).map(style => style.word.length)) + 1
 const DECKS_MIN_WIDTH = 10
 
+/** Every check so far as one fixed bar, each verdict's share in its colour. */
 function Sensors({ ui, data }: ModuleProps): RenderNode {
   const { Text } = ui.els
-  const strip = data.shields.recent.slice(-Math.max(SENSORS_MIN, ui.width - LABEL_WIDTH - FRAME_INSET))
+  const summary = shieldsSummary(data.shields)
+  const cells = shareCells(
+    VERDICTS.map(verdict => summary[verdict]),
+    SENSORS_WIDTH,
+  )
   return (
     <Row ui={ui} label="Sensors">
-      {strip.length === 0 ? <Text color={ui.colors.faint}>no checks yet</Text> : null}
-      {strip.map(check => (
-        <Text color={ui.colors[VERDICT_STYLE[check.verdict].role]} dimColor={check.inSubagent}>
-          {'▰'}
-        </Text>
+      {summary.total === 0 ? <Text color={ui.colors.faint}>no checks yet</Text> : null}
+      {VERDICTS.map((verdict, i) => (
+        <Text color={ui.colors[VERDICT_STYLE[verdict].role]}>{'▰'.repeat(cells[i] ?? 0)}</Text>
       ))}
     </Row>
   )
 }
 
+type TallyPart = { role: 'allowed' | 'cleared' | 'stopped' | 'waiting' | 'blocked'; label: string; count: number }
+
+/** The tallies above 0, separated; a row with none says so once. */
+function Tallies({ ui, parts }: { ui: UiContext; parts: readonly TallyPart[] }): RenderNode {
+  const { Text } = ui.els
+  const shown = parts.filter(part => part.count > 0)
+  if (shown.length === 0) return <Text color={ui.colors.faint}>none yet</Text>
+  return (
+    <Text>
+      {shown.map((part, i) => (
+        <Text>
+          {i > 0 ? <Sep ui={ui} /> : null}
+          <Tally ui={ui} color={ui.colors[part.role]} label={part.label} count={part.count} />
+        </Text>
+      ))}
+    </Text>
+  )
+}
+
 /** Protocols are Claude Code's rules; the decider answers prompts; the force field is what directives held. */
 function Verdicts({ ui, data }: ModuleProps): RenderNode {
-  const { Box, Text } = ui.els
+  const { Box } = ui.els
   const summary = shieldsSummary(data.shields)
   const { held } = data.shields
   return (
     <Box flexDirection="column">
       <Row ui={ui} label="Protocols">
-        <Tally ui={ui} color={ui.colors.allowed} label="cleared" count={summary.rule} />
-        <Sep ui={ui} />
-        <Tally ui={ui} color={ui.colors.stopped} label="stopped" count={summary.deny} />
-        {data.shields.recent.some(check => check.inSubagent) ? <Text color={ui.colors.faint}>{'   dim = subagents'}</Text> : null}
+        <Tallies
+          ui={ui}
+          parts={[
+            { role: 'allowed', label: 'cleared', count: summary.rule },
+            { role: 'stopped', label: 'stopped', count: summary.deny },
+          ]}
+        />
       </Row>
       <Row ui={ui} label={data.bridge.mode === 'auto' ? 'Autopilot' : 'Airlock'}>
-        <Tally ui={ui} color={ui.colors.cleared} label="cleared" count={summary.cleared} />
-        <Sep ui={ui} />
-        <Tally ui={ui} color={ui.colors.stopped} label="stopped" count={summary.refused} />
-        <Sep ui={ui} />
-        <Tally ui={ui} color={ui.colors.waiting} label="waiting" count={summary.ask} />
+        <Tallies
+          ui={ui}
+          parts={[
+            { role: 'cleared', label: 'cleared', count: summary.cleared },
+            { role: 'stopped', label: 'stopped', count: summary.refused },
+            { role: 'waiting', label: 'waiting', count: summary.ask },
+          ]}
+        />
       </Row>
       <Row ui={ui} label="Force field">
-        <Tally ui={ui} color={ui.colors.cleared} label="cleared" count={held.ran} />
-        <Sep ui={ui} />
-        <Tally ui={ui} color={ui.colors.stopped} label="stopped" count={held.refused} />
-        <Sep ui={ui} />
-        <Tally ui={ui} color={ui.colors.waiting} label="waiting" count={data.held ? 1 : 0} />
-        {data.hasBlockDirective ? <Sep ui={ui} /> : null}
-        {data.hasBlockDirective ? <Tally ui={ui} color={ui.colors.blocked} label="blocked" count={held.blocked} /> : null}
+        <Tallies
+          ui={ui}
+          parts={[
+            { role: 'cleared', label: 'cleared', count: held.ran },
+            { role: 'stopped', label: 'stopped', count: held.refused },
+            { role: 'waiting', label: 'waiting', count: data.held ? 1 : 0 },
+            ...(data.hasBlockDirective ? [{ role: 'blocked' as const, label: 'blocked', count: held.blocked }] : []),
+          ]}
+        />
       </Row>
     </Box>
   )
@@ -79,8 +112,19 @@ function DeckButton({ ui, deck, shields }: { ui: UiContext; deck: Deck; shields:
   )
 }
 
+/** The tools `other` holds most, so a deck left out of the setting is easy to spot. */
+function otherTools(shields: Shields): string[] {
+  const counts = new Map<string, number>()
+  for (const check of shields.recent) if (check.deck === 'other') counts.set(check.tool, (counts.get(check.tool) ?? 0) + 1)
+  return [...counts.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, OTHER_TOOLS_SHOWN)
+    .map(([tool]) => tool)
+}
+
 function Decks({ ui, data }: ModuleProps): RenderNode {
   const { Box, Text } = ui.els
+  const others = otherTools(data.shields)
   return (
     <Box alignItems="flex-start">
       <Box width={LABEL_WIDTH} flexShrink={0}>
@@ -90,6 +134,7 @@ function Decks({ ui, data }: ModuleProps): RenderNode {
         {data.config.decks.map(deck => (
           <DeckButton ui={ui} deck={deck} shields={data.shields} />
         ))}
+        {others.length > 0 ? <Text color={ui.colors.faint}>{`other: ${others.join(', ')}`}</Text> : null}
       </Box>
     </Box>
   )

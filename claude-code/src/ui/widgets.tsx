@@ -17,6 +17,21 @@ export function gaugeCells(pct: number, width: number): { on: string; off: strin
   return { on: '▰'.repeat(full), off: '▱'.repeat(width - full) }
 }
 
+/** `width` cells shared by counts, largest remainders first; any count above 0 keeps at least one cell. */
+export function shareCells(counts: readonly number[], width: number): number[] {
+  const total = counts.reduce((sum, count) => sum + count, 0)
+  if (total === 0) return counts.map(() => 0)
+  const exact = counts.map(count => (count / total) * width)
+  const cells = counts.map((count, i) => (count > 0 ? Math.max(1, Math.floor(exact[i] ?? 0)) : 0))
+  const spare = width - cells.reduce((sum, count) => sum + count, 0)
+  const byRemainder = counts
+    .map((count, i) => ({ i, rest: count > 0 ? (exact[i] ?? 0) % 1 : -1 }))
+    .filter(part => part.rest >= 0)
+    .sort((left, right) => right.rest - left.rest)
+  for (const part of byRemainder.slice(0, Math.max(0, spare))) cells[part.i] = (cells[part.i] ?? 0) + 1
+  return cells
+}
+
 /** A gauge whose fill takes the hazard colour of its percent. */
 export function Bar(props: { ui: DrawContext; pct: number }): RenderNode {
   const { Text } = props.ui.els
