@@ -1,6 +1,6 @@
 import type { RenderNode } from 'claude-code'
 import { shorten } from '../../../core'
-import { flightPaths, shuttleLabel } from '../../../domain'
+import { flightPaths, titleOf } from '../../../domain'
 import type { ModuleProps } from '../../context'
 import { SHUTTLE_STATUS } from '../../theme'
 
@@ -31,7 +31,7 @@ export function FlightPaths({ ui, data }: ModuleProps): RenderNode | null {
     const path = paths[i]
     const barX = LABEL_PX + ((path?.before ?? 0) / AXIS_CELLS) * AXIS_PX
     const width = Math.max(BAR_MIN_PX, ((path?.bar ?? 1) / AXIS_CELLS) * AXIS_PX)
-    const label = shorten(shuttleLabel(shuttle), LABEL_MAX).replace(/[<&>]/g, '')
+    const label = shorten(titleOf(shuttle), LABEL_MAX).replace(/[<&>]/g, '')
     return (
       `<text x="${LABEL_X}" y="${i * ROW_HEIGHT + LABEL_BASELINE}" font-size="${FONT_SIZE}" fill="${ui.svg.label}">${label}</text>` +
       `<rect x="${barX}" y="${i * ROW_HEIGHT + BAR_TOP}" width="${width}" height="${BAR_HEIGHT}" rx="${BAR_RADIUS}" fill="${ui.svg[SHUTTLE_STATUS[shuttle.status].svg]}"/>`

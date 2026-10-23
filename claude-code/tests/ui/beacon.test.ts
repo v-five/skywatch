@@ -24,7 +24,7 @@ describe('beacon', () => {
   })
 
   test('shuttles, the council and stops join the hazard', () => {
-    const shuttle = newShuttle({ id: 's', type: 'Explore', model: '', description: '', spawnedAt: 1 })
+    const shuttle = newShuttle([], { id: 's', type: 'Explore', model: '', description: '', prompt: '', spawnedAt: 1 })
     const council = openTransmission(DEFAULT_COUNCIL, { id: 'a', at: 1, moment: 'before done', via: 'architect' })
     const shields = recordCheck(DEFAULT_SHIELDS, {
       id: 'c',

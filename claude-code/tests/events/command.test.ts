@@ -22,7 +22,7 @@ describe('/skywatch', () => {
     world(on)
     await $.session.start(START)
     expect(await $.command.run(skywatch(''))).toMatchObject({
-      text: 'SkyWatch launched. Focus it with ctrl+x tab; 1-9 open docked shuttles, deck letters open their lists.',
+      text: 'SkyWatch launched. Focus it with ctrl+x tab; 1-9 fold or open shuttles, h opens the hangar, deck letters open their lists.',
     })
   })
 

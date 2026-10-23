@@ -11,14 +11,17 @@ import {
   newShuttle,
   noteTool,
   shownShuttles,
-  shuttleName,
+  shuttleTitle,
   statusOf,
   stepProbe,
+  titleOf,
+  uniqueTitle,
   withShuttle,
 } from '../../src/domain'
 import type { Shuttle } from '../../types'
 
-const shuttle = (id: string, spawnedAt = 1000) => newShuttle({ id, type: 'Explore', model: '', description: 'scan the repo', spawnedAt })
+const shuttle = (id: string, spawnedAt = 1000) =>
+  newShuttle([], { id, type: 'Explore', model: '', description: 'scan the repo', prompt: 'Scan the repo, token=abc123', spawnedAt })
 
 describe('a shuttle', () => {
   test('steps, notes tools and lands', () => {
@@ -37,8 +40,40 @@ describe('a shuttle', () => {
     expect(statusOf(reason as TurnCompleteReason)).toBe('failed')
   })
 
-  test('its name capitalizes type and description', () => {
-    expect(shuttleName(shuttle('s'))).toBe('Explore · Scan the repo')
+  test('its title is made from its mission, and its brief is kept redacted', () => {
+    expect(titleOf(shuttle('s'))).toBe('Repo scout')
+    expect(shuttle('s').brief).not.toContain('abc123')
+    expect(titleOf({ ...shuttle('s'), title: '' })).toBe('Repo scout')
+  })
+
+  test('titles name the doer and the subject of a mission', () => {
+    const titles = [
+      'Implement the footer component',
+      'Check refactor against the plan',
+      'Draft architecture from brief',
+      'Review draft, write final architecture',
+      'Probe classifier table with prototype keys',
+      'Run tests',
+      'Explore',
+      'Footer component',
+      '',
+    ].map(mission => shuttleTitle(mission, 'general-purpose'))
+    expect(titles).toEqual([
+      'Footer builder',
+      'Refactor reviewer',
+      'Architecture drafter',
+      'Draft reviewer',
+      'Classifier table prober',
+      'Tests runner',
+      'Scout',
+      'Footer agent',
+      'General-purpose',
+    ])
+  })
+
+  test('a title already flying is numbered', () => {
+    expect(uniqueTitle('Footer builder', ['Repo scout'])).toBe('Footer builder')
+    expect(uniqueTitle('Footer builder', ['Footer builder', 'Footer builder 2'])).toBe('Footer builder 3')
   })
 })
 

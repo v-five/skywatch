@@ -47,7 +47,7 @@ How full the context window is. The band above the prompt, the header's radar `�
 | `⌬` Bridge | the main model: Helm (effort, model, mode), Hull (context), Warp (request speed), what it is Scanning now, the Shuttles count and their Flight paths |
 | `⟁` Council | when an architect or advisor agent was consulted, and its last transmission |
 | `⛨` Shields | every permission check: Sensors (the latest checks), Protocols (your Claude Code rules), Airlock (prompts you answered; Autopilot in auto mode), Force field (what your directives held or blocked) and Decks (by kind of tool) |
-| `⇡` a shuttle | one card per subagent: Helm, Fuel with its flight time, Scanning or its Debrief once docked, and its last tool. Docked shuttles fold to one line |
+| `⇡` a shuttle | one card per subagent, titled from its mission ("Implement the footer component" reads `Footer builder`): its Mission, its Brief (the prompt it was given), Helm (effort, type, model), Fuel with its flight time, Scanning or its Debrief once docked, and its last tool. A card in flight is open until you fold it; docked shuttles land in the Hangar, one line that opens to their folded cards |
 | `◌` Probes | model loops no shuttle claims, such as workflow agents |
 | `✧` Mission | the whole session: Fuel (tokens, cost, calls), Flight time, Power (5-hour and 7-day limits), the Jump running now and the Last jump |
 | `▣` Black box | what happened, newest first, ten at a time |
@@ -99,7 +99,7 @@ The last directive that matches wins: SkyWatch's defaults come first, then your 
 | `/skywatch directives` | reload and list the directives |
 | `/skywatch palette` | list each surface's palette, the colours the palette files set, and lines they could not read |
 
-With the pane focused (`ctrl+x tab`): `1`–`9` open or fold a docked shuttle, and a deck's letter (`s` shell, `w` web, `a` agents, `m` mcp, `o` other and so on) opens its latest checks.
+With the pane focused (`ctrl+x tab`): `1`–`9` fold or open a shuttle's card, `h` opens the Hangar, and a deck's letter (`s` shell, `w` web, `a` agents, `m` mcp, `o` other and so on) opens its latest checks.
 
 ## Settings
 

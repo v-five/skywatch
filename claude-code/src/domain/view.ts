@@ -7,7 +7,8 @@ const UNFOLDED_MAX = 30
 export type PaneActions = {
   toggleFold(key: string): Promise<void>
   toggleDeck(deck: Deck): Promise<void>
-  toggleShuttle(id: string): Promise<void>
+  toggleShuttle(id: string, isInFlight: boolean): Promise<void>
+  toggleHangar(): Promise<void>
   showEntries(count: number): Promise<void>
 }
 
@@ -25,8 +26,15 @@ export function toggleDeck(view: View, deck: Deck): View {
   return { ...view, deckOpen: view.deckOpen === deck ? null : deck }
 }
 
-export function toggleExpanded(view: View, id: string): View {
-  return { ...view, expanded: view.expanded === id ? null : id }
+/** A shuttle in flight folds and unfolds on its own; one docked shuttle at a time opens past its title. */
+export function toggleShuttle(view: View, id: string, isInFlight: boolean): View {
+  if (!isInFlight) return { ...view, expanded: view.expanded === id ? null : id }
+  const folded = view.folded ?? []
+  return { ...view, folded: folded.includes(id) ? folded.filter(other => other !== id) : [...folded, id].slice(-UNFOLDED_MAX) }
+}
+
+export function toggleHangar(view: View): View {
+  return { ...view, isHangarOpen: !view.isHangarOpen }
 }
 
 export function withEntriesShown(view: View, count: number): View {

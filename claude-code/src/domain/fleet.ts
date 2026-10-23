@@ -1,20 +1,28 @@
 import type { TurnCompleteReason } from 'claude-code'
 import type { Probe, Shuttle, ShuttleStatus, ToolNote } from '../../types'
-import { capitalize, shorten } from '../core'
+import { redact, shorten } from '../core'
 import type { CallNote } from './bridge'
 import { DEFAULT_SHUTTLE } from './defaults'
 import { type StepUsage, stepTokens } from './mission'
 import { taskOf } from './tasks'
+import { shuttleTitle, uniqueTitle } from './titles'
 
 const SHUTTLES_MAX = 24
 const TOOL_NOTES_MAX = 3
 const PROBES_MAX = 60
 const ANSWER_MAX = 400
-const WRITER_MAX = 14
+const BRIEF_MAX = 600
+const WRITER_MAX = 20
 const PROBE_ACTIVE_MS = 15_000
 
-export function newShuttle(spawn: { id: string; type: string; model: string; description: string; spawnedAt: number }): Shuttle {
-  return { ...DEFAULT_SHUTTLE, ...spawn }
+/** A shuttle at launch: its title made from the mission and numbered past the fleet's, its brief redacted and cut. */
+export function newShuttle(
+  fleet: readonly Shuttle[],
+  spawn: { id: string; type: string; model: string; description: string; prompt: string; spawnedAt: number },
+): Shuttle {
+  const { prompt, ...rest } = spawn
+  const title = uniqueTitle(shuttleTitle(spawn.description, spawn.type), fleet.map(titleOf))
+  return { ...DEFAULT_SHUTTLE, ...rest, title, brief: shorten(redact(prompt), BRIEF_MAX) }
 }
 
 export function addShuttle(fleet: readonly Shuttle[], shuttle: Shuttle): Shuttle[] {
@@ -76,18 +84,14 @@ export function landShuttle(shuttle: Shuttle, landing: { status: ShuttleStatus; 
   }
 }
 
-/** A shuttle's title: the task in its own words, the agent type only when there is none. */
-export function shuttleLabel(shuttle: Shuttle): string {
-  return shuttle.description || shuttle.type
+/** A shuttle's short name: the one it launched with, or made now for one stored before titles. */
+export function titleOf(shuttle: Shuttle): string {
+  return shuttle.title || shuttleTitle(shuttle.description, shuttle.type)
 }
 
 /** The name a shuttle writes under in the black box, from its spawn on. */
 export function shuttleWriter(shuttle: Shuttle): string {
-  return shorten(shuttleLabel(shuttle), WRITER_MAX)
-}
-
-export function shuttleName(shuttle: Shuttle): string {
-  return shuttle.description ? `${capitalize(shuttle.type)} · ${capitalize(shuttle.description)}` : capitalize(shuttle.type)
+  return shorten(titleOf(shuttle), WRITER_MAX)
 }
 
 /** In flight first, then up to `docked` landed shuttles, newest first. */

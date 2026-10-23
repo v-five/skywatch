@@ -9,7 +9,8 @@ import { hazardsNow, openPane, PANE_ID, refreshStatus, remeasure } from './statu
 
 const USAGE = 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives|palette]'
 const HAZARDS_USAGE = 'Usage: /skywatch hazards viewscreen|beacon|off'
-const LAUNCHED = 'SkyWatch launched. Focus it with ctrl+x tab; 1-9 open docked shuttles, deck letters open their lists.'
+const LAUNCHED =
+  'SkyWatch launched. Focus it with ctrl+x tab; 1-9 fold or open shuttles, h opens the hangar, deck letters open their lists.'
 
 /** `/skywatch hazards [mode]`: without a mode it shows this session's, with one it sets it. */
 async function runHazards($: EngineInterface, runtime: Runtime, mode: string): Promise<string> {

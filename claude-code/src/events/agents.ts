@@ -5,6 +5,7 @@ import {
   addCouncilType,
   endTransmission,
   getCouncil,
+  getShuttles,
   isCouncilType,
   logEntry,
   markSeen,
@@ -31,11 +32,12 @@ async function launchAgent(
     await refreshStatus($, runtime)
     return
   }
-  const shuttle = newShuttle({
+  const shuttle = newShuttle(await getShuttles($), {
     id,
     type: e.name ?? e.subagentType,
     model: started.model,
     description: e.description,
+    prompt: e.prompt,
     spawnedAt: await $.clock.now(),
   })
   await patchShuttles($, fleet => addShuttle(fleet, shuttle))

@@ -73,7 +73,15 @@ export const DEFAULT_JUMP: Jump = {
 
 export const DEFAULT_TOTALS: SessionTotals = { id: '', firstSeen: 0, activeMs: 0, tokIn: 0, tokOut: 0, req: 0 }
 
-export const DEFAULT_VIEW: View = { expanded: null, deckOpen: null, unfolded: [], entriesShown: BLACKBOX_PAGE, hazards: null }
+export const DEFAULT_VIEW: View = {
+  expanded: null,
+  folded: [],
+  isHangarOpen: false,
+  deckOpen: null,
+  unfolded: [],
+  entriesShown: BLACKBOX_PAGE,
+  hazards: null,
+}
 
 export const DEFAULT_COUNCIL_ROSTER: CouncilRoster = { councilTypes: [] }
 
@@ -82,6 +90,8 @@ export const DEFAULT_SHUTTLE: Shuttle = {
   type: 'agent',
   model: '',
   description: '',
+  title: '',
+  brief: '',
   status: 'running',
   spawnedAt: 0,
   endedAt: null,

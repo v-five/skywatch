@@ -72,7 +72,12 @@ export type Shuttle = {
   id: string
   type: string
   model: string
+  /** The mission: the Agent call's short description. */
   description: string
+  /** A short name made from the mission when it launched ("Footer builder"); empty in older state. */
+  title?: string
+  /** The brief: the Agent call's prompt, redacted and cut. */
+  brief?: string
   status: ShuttleStatus
   spawnedAt: number
   endedAt: number | null
@@ -123,7 +128,12 @@ export type Jump = {
 export type LastJump = { durationMs: number; shuttles: number; edits: number; errors: number; costDelta: number | null; reason: string }
 
 export type View = {
+  /** The docked shuttle opened past its title row. */
   expanded: string | null
+  /** Shuttles in flight the person folded to their title row. */
+  folded?: string[]
+  /** Whether the hangar shows its docked shuttles. */
+  isHangarOpen?: boolean
   deckOpen: Deck | null
   /** Long texts opened past two lines, by fold key. */
   unfolded: string[]
