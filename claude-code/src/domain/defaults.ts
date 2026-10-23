@@ -37,6 +37,7 @@ export const DEFAULT_BRIDGE: Bridge = {
   command: null,
   task: null,
   plan: [],
+  planSteps: [],
   avg: DEFAULT_AVG,
 }
 

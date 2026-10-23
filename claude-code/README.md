@@ -47,6 +47,7 @@ How full the context window is. The band above the prompt, the header's radar `�
 | `⌬` Bridge | the main model: Helm (effort, model, mode), Hull (context), Warp (request speed), what it is Scanning now, the Shuttles count and their Flight paths |
 | `⟁` Council | when an architect or advisor agent was consulted, and its last transmission |
 | `⛨` Shields | every permission check: Sensors (the latest checks), Protocols (your Claude Code rules), Airlock (prompts you answered; Autopilot in auto mode), Force field (what your directives held or blocked) and Decks (by kind of tool) |
+| `⊹` Flight plan | the bridge's task list: each step done, in progress, pending or skipped (dropped before it was done), with progress in the title. Steps that share a name before `:` (`Fix findings: force field`, `Fix findings: domain`) form a phase; a finished phase folds to one line |
 | `⇡` a shuttle | one card per subagent, titled from its mission ("Implement the footer component" reads `Footer builder`): its Mission, its Brief (the prompt it was given), Helm (effort, type, model), Fuel with its flight time, Scanning or its Debrief once docked, and its last tool. A card in flight is open until you fold it; docked shuttles land in the Hangar, one line that opens to their folded cards |
 | `◌` Probes | model loops no shuttle claims, such as workflow agents |
 | `✧` Mission | the whole session: Fuel (tokens, cost, calls), Flight time, Power (5-hour and 7-day limits), the Jump running now and the Last jump |
@@ -109,7 +110,7 @@ In `/config`, or under `pluginConfigs["skywatch@v-five"].options` in `settings.j
 | --- | --- | --- |
 | `hazards` | `beacon` | `viewscreen`, `beacon` or `off` |
 | `autoLaunch` | `true` | launch the pane when a session starts |
-| `modules` | `bridge,council,shields,shuttles,probes,mission,blackbox` | the modules, in order; leave one out to hide it. `app=bridge,mission; terminal=bridge,shields` gives each surface its own |
+| `modules` | `bridge,plan,council,shields,shuttles,probes,mission,blackbox` | the modules, in order; leave one out to hide it. `app=bridge,mission; terminal=bridge,shields` gives each surface its own |
 | `palette` | `skywatch` | the colours; `app=…; terminal=…` gives each surface its own (see [Palettes](#palettes)) |
 | `decks` | `file,shell,other` | Shields decks, from `file`, `git`, `shell`, `web`, `agents`, `app` and `mcp`; `other` takes the rest |
 

@@ -8,7 +8,8 @@ test('parseConfig matches the pre-refactor output, its modules applying to every
     const { modules, palette, ...rest } = parseConfig(options)
     expect(modules.app).toEqual(modules.terminal)
     expect(palette).toEqual({ app: 'skywatch', terminal: 'skywatch' })
-    return { modules: modules.app, ...rest }
+    // The plan module came after the refactor: by default it sits after the bridge.
+    return { modules: modules.app.filter(module => module !== 'plan'), ...rest }
   }
   expect(CONFIGS.map(asBefore)).toEqual(GOLDEN.parseConfig)
 })

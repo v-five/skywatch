@@ -1,7 +1,7 @@
 import type { Deck, HazardMode } from '../../types'
 import { isOneOf } from './guards'
 
-const MODULES = ['bridge', 'council', 'shields', 'shuttles', 'probes', 'mission', 'blackbox'] as const
+const MODULES = ['bridge', 'plan', 'council', 'shields', 'shuttles', 'probes', 'mission', 'blackbox'] as const
 export type Module = (typeof MODULES)[number]
 
 /** Every deck, in the order a call is matched; `other` takes what no chosen deck matches. */

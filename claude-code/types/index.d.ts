@@ -19,6 +19,10 @@ export type SpeedAvg = { n: number; ttftMs: number; nTok: number; tokPerS: numbe
 
 export type Meta = { schemaVersion: number }
 
+/** A task-list step: pending, running (in progress), done, or skipped (dropped before it was done). */
+export type PlanStatus = 'pending' | 'running' | 'done' | 'skipped'
+export type PlanStep = { text: string; status: PlanStatus }
+
 export type Bridge = {
   model: string
   effort: string
@@ -33,6 +37,8 @@ export type Bridge = {
   command: string | null
   task: string | null
   plan: string[]
+  /** The task list with each step's status, as the plan card draws it. */
+  planSteps?: PlanStep[]
   avg: SpeedAvg
 }
 

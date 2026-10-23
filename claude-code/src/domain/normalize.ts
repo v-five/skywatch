@@ -8,6 +8,8 @@ import type {
   Jump,
   LastJump,
   Meta,
+  PlanStatus,
+  PlanStep,
   Probe,
   RateLimit,
   SessionTotals,
@@ -56,6 +58,12 @@ export function normalizeMeta(stored: unknown): Meta {
   return mergeDefaults({ schemaVersion: 0 }, stored)
 }
 
+const PLAN_STATUSES = ['pending', 'running', 'done', 'skipped'] as const satisfies readonly PlanStatus[]
+
+function isPlanStep(value: unknown): value is PlanStep {
+  return isRecord(value) && typeof value.text === 'string' && isOneOf(PLAN_STATUSES, value.status)
+}
+
 export function normalizeBridge(stored: unknown): Bridge {
   const bridge = mergeDefaults(DEFAULT_BRIDGE, stored, {
     speed: isSpeed,
@@ -64,7 +72,12 @@ export function normalizeBridge(stored: unknown): Bridge {
     command: isString,
     task: isString,
   })
-  return { ...bridge, plan: listOf(bridge.plan).filter(isString), avg: mergeDefaults(DEFAULT_AVG, bridge.avg) }
+  return {
+    ...bridge,
+    plan: listOf(bridge.plan).filter(isString),
+    planSteps: listOf(bridge.planSteps).filter(isPlanStep),
+    avg: mergeDefaults(DEFAULT_AVG, bridge.avg),
+  }
 }
 
 export function normalizeUsage(stored: unknown): Usage {

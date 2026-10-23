@@ -1,6 +1,7 @@
 import type { Bridge } from '../../types'
 import { isOneOf } from '../core'
 import { DEFAULT_BRIDGE } from './defaults'
+import { planAfter } from './plan'
 import { taskOf } from './tasks'
 
 export const EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const
@@ -34,7 +35,14 @@ export type CallNote = { doing: string; doingTitle: string; tool: string; input:
 /** The bridge after starting a tool call: what it is doing, and the task-list step the call starts. */
 export function withCall(bridge: Bridge, call: CallNote): Bridge {
   const step = taskOf(call.tool, call.input, bridge.plan, bridge.task)
-  return { ...bridge, doing: call.doing, doingTitle: call.doingTitle, ...(step ? { task: step.task, plan: step.plan } : {}) }
+  const planSteps = planAfter(bridge.planSteps ?? [], call.tool, call.input)
+  return {
+    ...bridge,
+    doing: call.doing,
+    doingTitle: call.doingTitle,
+    ...(step ? { task: step.task, plan: step.plan } : {}),
+    ...(planSteps ? { planSteps } : {}),
+  }
 }
 
 export function withStep(bridge: Bridge, model: string, effort: unknown): Bridge {

@@ -25,9 +25,9 @@
   "userConfig": {
     "modules": {
       "title": "Modules",
-      "description": "Comma-separated modules in display order: bridge, council, shields, shuttles, probes, mission, blackbox. Leave one out to hide it. Give each surface its own with app=…; terminal=…",
+      "description": "Comma-separated modules in display order: bridge, plan, council, shields, shuttles, probes, mission, blackbox. Leave one out to hide it. Give each surface its own with app=…; terminal=…",
       "type": "string",
-      "default": "bridge,council,shields,shuttles,probes,mission,blackbox"
+      "default": "bridge,plan,council,shields,shuttles,probes,mission,blackbox"
     },
     "decks": {
       "title": "Decks",
