@@ -3,7 +3,7 @@ import { capitalize, fmtClock, lineCost } from '../../core'
 import { BLACKBOX_PAGE, type KeyedEntry, keyedEntries } from '../../domain'
 import type { ModuleProps, ModuleView, UiContext } from '../context'
 import { ModuleFrame } from '../frame'
-import { FRAME_INSET } from '../metrics'
+import { FOLD_MARK, FRAME_INSET } from '../metrics'
 import { COLORS, entryColor } from '../theme'
 import { Fold } from '../widgets'
 
@@ -68,10 +68,22 @@ function BlackboxModule({ ui, data }: ModuleProps): RenderNode {
       {hasMore || hasLess ? (
         <Box justifyContent="center" columnGap={3} marginTop={1}>
           {hasMore ? (
-            <Button key="log-more" plain dimColor label="Reconstitute ⌄" onPress={() => ui.actions.showEntries(count + BLACKBOX_PAGE)} />
+            <Button
+              key="log-more"
+              plain
+              dimColor
+              label={`Reconstitute ${FOLD_MARK.closed}`}
+              onPress={() => ui.actions.showEntries(count + BLACKBOX_PAGE)}
+            />
           ) : null}
           {hasLess ? (
-            <Button key="log-less" plain dimColor label="Archive ⌃" onPress={() => ui.actions.showEntries(BLACKBOX_PAGE)} />
+            <Button
+              key="log-less"
+              plain
+              dimColor
+              label={`Archive ${FOLD_MARK.open}`}
+              onPress={() => ui.actions.showEntries(BLACKBOX_PAGE)}
+            />
           ) : null}
         </Box>
       ) : null}

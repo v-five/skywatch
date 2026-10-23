@@ -52,7 +52,7 @@ How full the context window is. The band above the prompt, the header's radar `�
 | `✧` Mission | the whole session: Fuel (tokens, cost, calls), Flight time, Power (5-hour and 7-day limits), the Jump running now and the Last jump |
 | `▣` Black box | what happened, newest first, ten at a time |
 
-A module's title row shows the loader while its work runs. Long text folds to two lines with a `⌄` to open it.
+A module's title row shows the loader while its work runs. Long text folds to two lines with a `▼` to open it.
 
 ## Directives
 

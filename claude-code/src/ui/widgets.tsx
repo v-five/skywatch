@@ -4,7 +4,7 @@ import { EFFORTS, effortLevel, effortPct } from '../domain'
 import type { DrawContext, UiContext } from './context'
 import { hazardOf } from './hazard'
 import { Sep } from './layout'
-import { GAUGE_WIDTH } from './metrics'
+import { FOLD_MARK, GAUGE_WIDTH } from './metrics'
 import { COLORS } from './theme'
 
 const FOLD_MIN_WIDTH = 10
@@ -73,7 +73,13 @@ export function Fold(props: { ui: UiContext; foldKey: string; text: string; widt
       </Box>
       {isLong ? (
         <Box flexShrink={0} marginLeft={1}>
-          <Button key={`fold-${foldKey}`} plain dimColor label={isOpen ? '⌃' : '⌄'} onPress={() => ui.actions.toggleFold(foldKey)} />
+          <Button
+            key={`fold-${foldKey}`}
+            plain
+            dimColor
+            label={isOpen ? FOLD_MARK.open : FOLD_MARK.closed}
+            onPress={() => ui.actions.toggleFold(foldKey)}
+          />
         </Box>
       ) : null}
     </Box>

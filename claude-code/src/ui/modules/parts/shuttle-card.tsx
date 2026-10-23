@@ -4,7 +4,7 @@ import { kTokens, prettyModel, shorten } from '../../../core'
 import { isEffort, shuttleName } from '../../../domain'
 import type { UiContext } from '../../context'
 import { Blank, Border, Row, RowBlock, Ruler, Sep } from '../../layout'
-import { FRAME_INSET, LABEL_WIDTH, MIN_LOADER_ROOM } from '../../metrics'
+import { FOLD_MARK, FRAME_INSET, LABEL_WIDTH, MIN_LOADER_ROOM } from '../../metrics'
 import { COLORS, SHUTTLE_STATUS } from '../../theme'
 import { Connector, Effort, Fold, LiveClock } from '../../widgets'
 
@@ -57,7 +57,7 @@ function ShuttleTitle({ ui, shuttle, index, isFolded }: CardProps & { isFolded: 
             plain
             dimColor
             {...(index < HOTKEYS ? { hotkey: String(index + 1) } : {})}
-            label={isFolded ? '⌄' : '⌃'}
+            label={isFolded ? FOLD_MARK.closed : FOLD_MARK.open}
             onPress={() => ui.actions.toggleShuttle(shuttle.id)}
           />
         )}

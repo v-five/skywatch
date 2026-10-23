@@ -21,3 +21,5 @@ export const GAUGE_WIDTH = 10
 export const FRAME_INSET = 4
 /** The gap between values on a row. */
 export const SEPARATOR = '  │  '
+/** Fold marks: triangles sit centred on a line, where the chevrons ⌄ ⌃ sit low and high. */
+export const FOLD_MARK = { closed: '▼', open: '▲' } as const
