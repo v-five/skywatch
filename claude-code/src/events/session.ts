@@ -2,6 +2,7 @@ import type { EngineInterface, On } from 'claude-code'
 import { usageFrom, withCommand } from '../domain'
 import { homeFolder, loadDirectives } from '../forcefield'
 import { loadTotals, migrateState, patchBridge, patchUsage, readUsage, recordUsage, resetAll } from '../state'
+import { loadPaletteFiles } from './palette'
 import type { Runtime } from './runtime'
 import { openPane, refreshStatus, remeasure } from './status'
 
@@ -9,10 +10,11 @@ async function startSession($: EngineInterface, runtime: Runtime): Promise<void>
   runtime.directives = await loadDirectives($).catch(() => runtime.directives)
   const [cwd, home] = await Promise.all([$.session.cwd().catch(() => ''), homeFolder($)])
   runtime.places = { cwd, home }
+  runtime.paletteFiles = await loadPaletteFiles($, home).catch(() => runtime.paletteFiles)
   await $.command.register({
     name: 'skywatch',
-    description: 'SkyWatch, a starbase for your session: launch, dock, recalibrate, hazards, directives',
-    argumentHint: '[launch|dock|recalibrate|hazards viewscreen|beacon|off|directives]',
+    description: 'SkyWatch, a starbase for your session: launch, dock, recalibrate, hazards, directives, palette',
+    argumentHint: '[launch|dock|recalibrate|hazards viewscreen|beacon|off|directives|palette]',
   })
   await migrateState($)
   // A command still marked running belongs to a process that has gone.

@@ -32,7 +32,7 @@ describe('/skywatch', () => {
     expect(await $.command.run(skywatch('dock'))).toMatchObject({ text: 'SkyWatch docked.' })
     expect(await $.command.run(skywatch('recalibrate'))).toMatchObject({ text: 'SkyWatch recalibrated.' })
     expect(await $.command.run(skywatch('warp'))).toMatchObject({
-      text: 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives]',
+      text: 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives|palette]',
     })
   })
 

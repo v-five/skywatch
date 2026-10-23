@@ -1,11 +1,10 @@
 import type { ElementTable, RenderNode } from 'claude-code'
-import { capitalize, type Module } from '../core'
+import { capitalize, type Module, surfaceGroupOf } from '../core'
 import { hasCouncil, isTransmitting } from '../domain'
 import type { ModuleProps } from './context'
 import { hazardOf } from './hazard'
 import { Stack } from './layout'
 import { MODULE_VIEWS } from './modules'
-import { COLORS } from './theme'
 
 /** The header: the radar in the hazard's colour, and the architect's watch once the council has sat. */
 function Header({ ui, data }: ModuleProps): RenderNode {
@@ -14,10 +13,10 @@ function Header({ ui, data }: ModuleProps): RenderNode {
   return (
     <Box justifyContent="center" marginBottom={1}>
       <Text bold wrap="truncate">
-        <Text color={data.usage.pct !== null ? hazardOf(data.usage.pct).color : COLORS.shuttles}>◎</Text>
+        <Text color={data.usage.pct !== null ? hazardOf(data.usage.pct, ui.space).color : ui.colors.shuttles}>◎</Text>
         <Text> SkyWatch</Text>
-        {hasSat ? <Text color={COLORS.dim}> · </Text> : null}
-        {hasSat ? <Text color={COLORS.council}>Architect</Text> : null}
+        {hasSat ? <Text color={ui.colors.dim}> · </Text> : null}
+        {hasSat ? <Text color={ui.colors.council}>Architect</Text> : null}
         {hasSat ? <Text>{isTransmitting(data.council) ? ' transmitting' : ' on watch'}</Text> : null}
       </Text>
     </Box>
@@ -25,6 +24,8 @@ function Header({ ui, data }: ModuleProps): RenderNode {
 }
 
 const RECALIBRATE_HINT = 'Run /skywatch recalibrate to clear its readings.'
+/** A theme key: a pane that cannot draw may not have its palette either. */
+const FAULT_COLOR = 'error'
 
 /** One module, or a line saying it failed: a module that throws never takes the rest of the pane with it. */
 function drawModule(module: Module, props: ModuleProps): RenderNode | null {
@@ -33,7 +34,7 @@ function drawModule(module: Module, props: ModuleProps): RenderNode | null {
     const view = MODULE_VIEWS[module]
     return view.isEmpty(props.data) ? null : view.draw(props)
   } catch (error) {
-    return <Text color={COLORS.alert}>{`⚠ ${capitalize(module)} could not draw: ${errorText(error)}`}</Text>
+    return <Text color={props.ui.colors.alert}>{`⚠ ${capitalize(module)} could not draw: ${errorText(error)}`}</Text>
   }
 }
 
@@ -45,7 +46,9 @@ export function errorText(error: unknown): string {
 export function Pane(props: ModuleProps): RenderNode {
   const { ui, data } = props
   const { Box } = ui.els
-  const drawn = data.config.modules.map(module => drawModule(module, props)).filter((node): node is RenderNode => node !== null)
+  const drawn = data.config.modules[surfaceGroupOf(ui.surface)]
+    .map(module => drawModule(module, props))
+    .filter((node): node is RenderNode => node !== null)
   return (
     <Box flexDirection="column" width={ui.width}>
       <Header {...props} />
@@ -59,7 +62,7 @@ export function PaneFault(props: { els: ElementTable; reason: string }): RenderN
   const { Box, Text } = props.els
   return (
     <Box flexDirection="column">
-      <Text color={COLORS.alert}>{`⚠ SkyWatch could not draw: ${props.reason}`}</Text>
+      <Text color={FAULT_COLOR}>{`⚠ SkyWatch could not draw: ${props.reason}`}</Text>
       <Text dimColor>{RECALIBRATE_HINT}</Text>
     </Box>
   )

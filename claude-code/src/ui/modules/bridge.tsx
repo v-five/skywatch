@@ -5,7 +5,6 @@ import type { ModuleProps, ModuleView } from '../context'
 import { ModuleFrame } from '../frame'
 import { Row, RowBlock, Ruler, Sep } from '../layout'
 import { FRAME_INSET, LABEL_WIDTH } from '../metrics'
-import { COLORS } from '../theme'
 import { Bar, Effort, Fold } from '../widgets'
 import { FlightPaths } from './parts'
 
@@ -37,7 +36,7 @@ function Hull({ ui, data }: ModuleProps): RenderNode {
       <Text>{usage.tokens !== null && usage.window ? `${kTokens(tokens)} / ${kTokens(usage.window)}` : kTokens(tokens)}</Text>
       <Sep ui={ui} />
       <Text>{`${bridge.steps} calls`}</Text>
-      {usage.compactions ? <Text color={COLORS.waiting}>{`  ⟲${usage.compactions}`}</Text> : null}
+      {usage.compactions ? <Text color={ui.colors.waiting}>{`  ⟲${usage.compactions}`}</Text> : null}
     </Row>
   )
 }
@@ -69,7 +68,7 @@ function Scanning({ ui, data }: ModuleProps): RenderNode | null {
     <Box flexDirection="column">
       <Ruler ui={ui} />
       <Row ui={ui} label="Scanning">
-        <Text color={COLORS.bridge} bold>
+        <Text color={ui.colors.bridge} bold>
           {reading}
         </Text>
       </Row>
@@ -90,7 +89,7 @@ function Fleet({ ui, data }: ModuleProps): RenderNode | null {
     <Box flexDirection="column">
       <Ruler ui={ui} />
       <Row ui={ui} label="Shuttles">
-        <Text color={running > 0 ? COLORS.shuttles : COLORS.dim}>{`${running > 0 ? '◐' : '○'} ${running} in flight`}</Text>
+        <Text color={running > 0 ? ui.colors.shuttles : ui.colors.dim}>{`${running > 0 ? '◐' : '○'} ${running} in flight`}</Text>
         <Text dimColor>{` · ${data.fleet.length} total`}</Text>
       </Row>
       <FlightPaths ui={ui} data={data} />
@@ -107,9 +106,9 @@ function BridgeModule(props: ModuleProps): RenderNode {
     <ModuleFrame
       ui={props.ui}
       title="⌬ Bridge"
-      color={COLORS.bridge}
+      color={props.ui.colors.bridge}
       isActive={isBusy}
-      note={[{ text: state, color: isBusy ? COLORS.bridge : COLORS.dim }]}
+      note={[{ text: state, color: isBusy ? props.ui.colors.bridge : props.ui.colors.dim }]}
       noteSlack={STATE_SLACK}
     >
       <Helm {...props} />

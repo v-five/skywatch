@@ -4,7 +4,7 @@ import { BLACKBOX_PAGE, type KeyedEntry, keyedEntries } from '../../domain'
 import type { ModuleProps, ModuleView, UiContext } from '../context'
 import { ModuleFrame } from '../frame'
 import { FOLD_MARK, FRAME_INSET } from '../metrics'
-import { COLORS, entryColor } from '../theme'
+import { entryColor } from '../theme'
 import { Fold } from '../widgets'
 
 const TIME_WIDTH = fmtClock(0).length + 1
@@ -21,10 +21,10 @@ function Entry({ ui, keyed }: { ui: UiContext; keyed: KeyedEntry }): RenderNode 
   return (
     <Box alignItems="flex-start">
       <Box width={TIME_WIDTH} flexShrink={0}>
-        <Text color={COLORS.faint}>{fmtClock(entry.at)}</Text>
+        <Text color={ui.colors.faint}>{fmtClock(entry.at)}</Text>
       </Box>
       <Box width={WRITER_WIDTH} flexShrink={0}>
-        <Text color={entryColor(entry)} bold wrap="truncate">
+        <Text color={entryColor(entry, ui.colors)} bold wrap="truncate">
           {capitalize(entry.who)}
         </Text>
       </Box>
@@ -34,7 +34,7 @@ function Entry({ ui, keyed }: { ui: UiContext; keyed: KeyedEntry }): RenderNode 
           foldKey={keyed.foldKey}
           text={relativePaths(entry.text, ui.places)}
           width={textWidth}
-          color={entry.kind === 'error' ? COLORS.alert : COLORS.text}
+          color={entry.kind === 'error' ? ui.colors.alert : ui.colors.text}
         />
       </Box>
       {cost ? (
@@ -58,10 +58,10 @@ function BlackboxModule({ ui, data }: ModuleProps): RenderNode {
     <ModuleFrame
       ui={ui}
       title={data.viewedAgentId ? '▣ Black box · this shuttle' : '▣ Black box'}
-      color={COLORS.dim}
+      color={ui.colors.dim}
       note={[{ text: `${shown.length} of ${all.length}`, isDim: true }]}
     >
-      {shown.length === 0 ? <Text color={COLORS.faint}>nothing yet</Text> : null}
+      {shown.length === 0 ? <Text color={ui.colors.faint}>nothing yet</Text> : null}
       {shown.map(keyed => (
         <Entry ui={ui} keyed={keyed} />
       ))}

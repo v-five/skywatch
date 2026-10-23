@@ -97,6 +97,7 @@ The last directive that matches wins: SkyWatch's defaults come first, then your 
 | `/skywatch recalibrate` | clear the shuttles, checks, transmissions, the black box and the jump; fuel, power and compactions stay |
 | `/skywatch hazards viewscreen\|beacon\|off` | change the hazard scale for this session; without a value, show it |
 | `/skywatch directives` | reload and list the directives |
+| `/skywatch palette` | list each surface's palette, the colours the palette files set, and lines they could not read |
 
 With the pane focused (`ctrl+x tab`): `1`–`9` open or fold a docked shuttle, and a deck's letter (`s` shell, `w` web, `a` agents, `m` mcp, `o` other and so on) opens its latest checks.
 
@@ -108,8 +109,30 @@ In `/config`, or under `pluginConfigs["skywatch@v-five"].options` in `settings.j
 | --- | --- | --- |
 | `hazards` | `beacon` | `viewscreen`, `beacon` or `off` |
 | `autoLaunch` | `true` | launch the pane when a session starts |
-| `modules` | `bridge,council,shields,shuttles,probes,mission,blackbox` | the modules, in order; leave one out to hide it |
+| `modules` | `bridge,council,shields,shuttles,probes,mission,blackbox` | the modules, in order; leave one out to hide it. `app=bridge,mission; terminal=bridge,shields` gives each surface its own |
+| `palette` | `skywatch` | the colours; `app=…; terminal=…` gives each surface its own (see [Palettes](#palettes)) |
 | `decks` | `file,shell,other` | Shields decks, from `file`, `git`, `shell`, `web`, `agents`, `app` and `mcp`; `other` takes the rest |
+
+## Palettes
+
+| Palette | Colours |
+| --- | --- |
+| `skywatch` | SkyWatch's own hex scale |
+| `terminal` | the terminal's 16 colours, so the terminal's theme (Catppuccin, Dracula, Nord…) paints it |
+| `claude` | Claude Code's theme colours for the modules and results; the hazard scale in the terminal's colours |
+| `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `catppuccin-latte` | Catppuccin; `catppuccin` alone is Mocha |
+| `dracula`, `nord`, `gruvbox`, `tokyo-night` | those themes' colours |
+
+`~/.claude/skywatch.palette`, then the project's `.claude/skywatch.palette`, recolour single parts over the chosen palette, one `name = colour` per line, `#` for comments. A colour is a hex value, a terminal colour name (`green`, `cyanBright`) or a Claude Code theme key (`success`).
+
+```
+# a hazard step recolours the modules drawn from it
+ion-storm = #fab387
+# a module or result recolours only itself
+shields = green
+```
+
+Steps: `clear-space`, `stardust`, `nebula`, `gas-cloud`, `debris`, `asteroids`, `ion-storm`, `event-horizon`. Parts: `bridge`, `shuttles`, `shields`, `council`, `allowed`, `cleared`, `waiting`, `stopped`, `blocked`, `held`, `alert`, `dim`, `faint`, `text`. The desktop app draws terminal colour names its own way, so `terminal` suits the terminal best.
 
 ## What it can reach
 

@@ -4,7 +4,6 @@ import type { ActiveHold } from '../../../forcefield'
 import type { UiContext } from '../../context'
 import { Row } from '../../layout'
 import { LABEL_WIDTH, SEPARATOR } from '../../metrics'
-import { COLORS } from '../../theme'
 import { LiveClock } from '../../widgets'
 
 const LINES_SHOWN = 3
@@ -17,18 +16,18 @@ export function HeldCall({ ui, held }: { ui: UiContext; held: ActiveHold }): Ren
     <Box flexDirection="column">
       <Box>
         <Box width={LABEL_WIDTH} flexShrink={0}>
-          <Text color={COLORS.held} bold>
+          <Text color={ui.colors.held} bold>
             Held
           </Text>
         </Box>
-        <Text color={COLORS.held}>{'waiting '}</Text>
+        <Text color={ui.colors.held}>{'waiting '}</Text>
         <Box flexShrink={0}>
-          <LiveClock ui={ui} clockKey="held-clock" since={held.since} endAt={null} color={COLORS.held} />
+          <LiveClock ui={ui} clockKey="held-clock" since={held.since} endAt={null} color={ui.colors.held} />
         </Box>
         <Text dimColor wrap="truncate">{`${SEPARATOR}from ${capitalize(held.who)}`}</Text>
       </Box>
       <Row ui={ui} label="">
-        <Text color={COLORS.held} bold>
+        <Text color={ui.colors.held} bold>
           {held.headline}
         </Text>
       </Row>
@@ -42,16 +41,16 @@ export function HeldCall({ ui, held }: { ui: UiContext; held: ActiveHold }): Ren
       ))}
       {hidden > 0 ? (
         <Row ui={ui} label="">
-          <Text color={COLORS.faint}>{`+${hidden} more`}</Text>
+          <Text color={ui.colors.faint}>{`+${hidden} more`}</Text>
         </Row>
       ) : null}
       {held.note ? (
         <Row ui={ui} label="">
-          <Text color={COLORS.faint}>{held.note}</Text>
+          <Text color={ui.colors.faint}>{held.note}</Text>
         </Row>
       ) : null}
       <Row ui={ui} label="">
-        <Text color={COLORS.held}>answer in the permission prompt</Text>
+        <Text color={ui.colors.held}>answer in the permission prompt</Text>
       </Row>
     </Box>
   )

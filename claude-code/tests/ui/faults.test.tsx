@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'claude-code/testing'
-import { drawContext, PaneFault } from '../../src/ui'
+import { DEFAULT_PALETTE, drawContext, PaneFault } from '../../src/ui'
 import { paneRequest } from '../support/drive'
 
 const PROBE = { ...paneRequest('desktop'), plugin: 'test', requestId: 'probe' } as const
@@ -8,8 +8,8 @@ describe('the pane: faults', () => {
   test('after a client module fails, drawings leave client modules out', async ($, on) => {
     on('ui.render', { component: 'Pane', requestId: 'probe' }, (engine, e) => {
       const els = engine.ui.resolve(e)
-      expect(drawContext(els).hasClient).toBe(true)
-      expect(drawContext(els, false).hasClient).toBe(false)
+      expect(drawContext(els, DEFAULT_PALETTE).hasClient).toBe(true)
+      expect(drawContext(els, DEFAULT_PALETTE, false).hasClient).toBe(false)
       return <els.Text>probe</els.Text>
     })
     const ui = await $.ui.mount(PROBE)

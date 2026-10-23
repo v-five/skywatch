@@ -1,23 +1,27 @@
-import { SPACE } from './theme'
+import { DEFAULT_PALETTE, type Space, type SpaceStep } from './palette'
 
 export type Hazard = { upTo: number; icon: string; word: string; color: string }
 
-const EVENT_HORIZON: Hazard = { upTo: Number.POSITIVE_INFINITY, icon: '◉', word: 'Event horizon', color: SPACE.eventHorizon }
+type Step = { upTo: number; icon: string; word: string; step: SpaceStep }
 
-/** Hazard steps by percent of the context window used: single-width symbols, fixed hex on every surface. */
-const HAZARD_SCALE: readonly Hazard[] = [
-  { upTo: 10, icon: '✦', word: 'Clear space', color: SPACE.clearSpace },
-  { upTo: 25, icon: '∙', word: 'Stardust', color: SPACE.stardust },
-  { upTo: 40, icon: '≈', word: 'Nebula', color: SPACE.nebula },
-  { upTo: 55, icon: '☁', word: 'Gas cloud', color: SPACE.gasCloud },
-  { upTo: 70, icon: '∴', word: 'Debris', color: SPACE.debris },
-  { upTo: 80, icon: '☄', word: 'Asteroid field', color: SPACE.asteroids },
-  { upTo: 90, icon: 'ϟ', word: 'Ion storm', color: SPACE.ionStorm },
+const EVENT_HORIZON: Step = { upTo: Number.POSITIVE_INFINITY, icon: '◉', word: 'Event horizon', step: 'eventHorizon' }
+
+/** Hazard steps by percent of the context window used: single-width symbols. */
+const HAZARD_SCALE: readonly Step[] = [
+  { upTo: 10, icon: '✦', word: 'Clear space', step: 'clearSpace' },
+  { upTo: 25, icon: '∙', word: 'Stardust', step: 'stardust' },
+  { upTo: 40, icon: '≈', word: 'Nebula', step: 'nebula' },
+  { upTo: 55, icon: '☁', word: 'Gas cloud', step: 'gasCloud' },
+  { upTo: 70, icon: '∴', word: 'Debris', step: 'debris' },
+  { upTo: 80, icon: '☄', word: 'Asteroid field', step: 'asteroids' },
+  { upTo: 90, icon: 'ϟ', word: 'Ion storm', step: 'ionStorm' },
   EVENT_HORIZON,
 ]
 
-export function hazardOf(pct: number): Hazard {
-  return HAZARD_SCALE.find(hazard => pct < hazard.upTo) ?? EVENT_HORIZON
+/** The hazard for a percent, coloured by `space`: SkyWatch's own colours unless a palette says otherwise. */
+export function hazardOf(pct: number, space: Space = DEFAULT_PALETTE.space): Hazard {
+  const { upTo, icon, word, step } = HAZARD_SCALE.find(hazard => pct < hazard.upTo) ?? EVENT_HORIZON
+  return { upTo, icon, word, color: space[step] }
 }
 
 const RING = '○◔◑◕●'

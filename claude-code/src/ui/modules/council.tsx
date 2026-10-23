@@ -4,7 +4,6 @@ import { hasCouncil, isTransmitting, latestTransmission, MOMENTS, transmissionTi
 import type { ModuleProps, ModuleView } from '../context'
 import { ModuleFrame } from '../frame'
 import { FRAME_INSET } from '../metrics'
-import { COLORS } from '../theme'
 import { Fold } from '../widgets'
 
 const TIMELINE_MIN = 8
@@ -28,14 +27,14 @@ function CouncilModule(props: ModuleProps): RenderNode {
     <ModuleFrame
       ui={ui}
       title="⟁ Council"
-      color={COLORS.council}
+      color={ui.colors.council}
       isActive={isLive}
       note={[
         { text: `Architect ${isLive ? 'transmitting' : 'on watch'} · transmissions `, isDim: true },
-        { text: String(council.transmissions.length), color: COLORS.council, isBold: true },
+        { text: String(council.transmissions.length), color: ui.colors.council, isBold: true },
       ]}
     >
-      <Text color={COLORS.council}>{transmissionTimeline(council, ui.now, Math.max(TIMELINE_MIN, ui.width - FRAME_INSET))}</Text>
+      <Text color={ui.colors.council}>{transmissionTimeline(council, ui.now, Math.max(TIMELINE_MIN, ui.width - FRAME_INSET))}</Text>
       {last ? (
         <Text dimColor wrap="truncate">
           {last}
@@ -45,14 +44,14 @@ function CouncilModule(props: ModuleProps): RenderNode {
       )}
       <Box flexWrap="wrap" columnGap={2}>
         {MOMENTS.map(each => (
-          <Text color={each === moment ? COLORS.council : COLORS.dim} bold={each === moment}>
+          <Text color={each === moment ? ui.colors.council : ui.colors.dim} bold={each === moment}>
             {each === moment ? '◆' : '◇'} {each}
           </Text>
         ))}
-        <Text color={COLORS.faint}>(inferred)</Text>
+        <Text color={ui.colors.faint}>(inferred)</Text>
       </Box>
       {council.lastAdvice ? (
-        <Fold ui={ui} foldKey="advice" text={`» ${council.lastAdvice}`} width={ui.width - FRAME_INSET} color={COLORS.council} />
+        <Fold ui={ui} foldKey="advice" text={`» ${council.lastAdvice}`} width={ui.width - FRAME_INSET} color={ui.colors.council} />
       ) : null}
     </ModuleFrame>
   )

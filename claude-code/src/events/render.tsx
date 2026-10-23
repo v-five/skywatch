@@ -16,7 +16,7 @@ import {
   paneActions,
 } from '../state'
 import { drawContext, errorText, Pane, type PaneData, PaneFault, type UiContext, uiContext, Viewscreen } from '../ui'
-import { hasBlockDirective, heldNow, type Runtime } from './runtime'
+import { hasBlockDirective, heldNow, paletteFor, type Runtime } from './runtime'
 import { hazardsNow, readBeacon } from './status'
 
 type PaneRequest = { surface: UiContext['surface']; bodyColumns: number; viewedAgentId: string | null; els: UiContext['els'] }
@@ -46,6 +46,7 @@ async function paneContext($: EngineInterface, runtime: Runtime, pane: PaneReque
     actions: paneActions($),
     canAnimate: !runtime.hasClientFault,
     places: runtime.places,
+    palette: paletteFor(runtime, pane.surface),
   })
   const data: PaneData = {
     config: runtime.config,
@@ -84,7 +85,7 @@ export function registerRender(on: On, runtime: Runtime): void {
     const [usage, bridge, lastJump] = await Promise.all([getUsage($), getBridge($), getLastJump($)])
     return (
       <Viewscreen
-        draw={drawContext($.ui.resolve(e), !runtime.hasClientFault)}
+        draw={drawContext($.ui.resolve(e), paletteFor(runtime, e.surface), !runtime.hasClientFault)}
         surface={e.surface}
         bodyColumns={e.props.bodyColumns}
         usage={usage}

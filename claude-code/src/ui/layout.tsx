@@ -1,7 +1,6 @@
 import type { RenderChildren, RenderNode } from 'claude-code'
 import type { UiContext } from './context'
 import { FRAME_INSET, LABEL_WIDTH, SEPARATOR } from './metrics'
-import { COLORS } from './theme'
 
 /** A label column, then values that truncate on one line. */
 export function Row(props: { ui: UiContext; label: string; children?: RenderChildren }): RenderNode {
@@ -33,14 +32,14 @@ export function RowBlock(props: { ui: UiContext; label: string; children?: Rende
 
 export function Sep(props: { ui: UiContext }): RenderNode {
   const { Text } = props.ui.els
-  return <Text color={COLORS.faint}>{SEPARATOR}</Text>
+  return <Text color={props.ui.colors.faint}>{SEPARATOR}</Text>
 }
 
 /** A rule across the frame; truncated, as the desktop app draws '─' wider than a cell. */
 export function Ruler(props: { ui: UiContext; isDashed?: boolean }): RenderNode {
   const { Text } = props.ui.els
   return (
-    <Text color={COLORS.faint} wrap="truncate">
+    <Text color={props.ui.colors.faint} wrap="truncate">
       {(props.isDashed ? '╌' : '─').repeat(Math.max(1, props.ui.width - FRAME_INSET))}
     </Text>
   )

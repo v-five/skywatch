@@ -5,7 +5,6 @@ import type { DrawContext, UiContext } from './context'
 import { hazardOf } from './hazard'
 import { Sep } from './layout'
 import { FOLD_MARK, GAUGE_WIDTH } from './metrics'
-import { COLORS } from './theme'
 
 const FOLD_MIN_WIDTH = 10
 const FOLD_LINES = 2
@@ -24,8 +23,8 @@ export function Bar(props: { ui: DrawContext; pct: number }): RenderNode {
   const cells = gaugeCells(props.pct, GAUGE_WIDTH)
   return (
     <Text>
-      <Text color={hazardOf(props.pct).color}>{cells.on}</Text>
-      <Text color={COLORS.faint}>{cells.off}</Text>
+      <Text color={hazardOf(props.pct, props.ui.space).color}>{cells.on}</Text>
+      <Text color={props.ui.colors.faint}>{cells.off}</Text>
     </Text>
   )
 }
@@ -34,11 +33,11 @@ export function Bar(props: { ui: DrawContext; pct: number }): RenderNode {
 export function Effort(props: { ui: UiContext; effort: string }): RenderNode {
   const { Text } = props.ui.els
   const level = effortLevel(props.effort)
-  const color = hazardOf(effortPct(props.effort)).color
+  const color = hazardOf(effortPct(props.effort), props.ui.space).color
   return (
     <Text>
       <Text color={color}>{'▰'.repeat(level)}</Text>
-      <Text color={COLORS.faint}>{'▱'.repeat(EFFORTS.length - level)}</Text>
+      <Text color={props.ui.colors.faint}>{'▱'.repeat(EFFORTS.length - level)}</Text>
       <Text>{' '.repeat(GAUGE_WIDTH - EFFORTS.length)}</Text>
       <Text color={color} bold>{`  ${props.effort}`}</Text>
       <Sep ui={props.ui} />
@@ -106,8 +105,9 @@ export function Connector(props: {
   spacing?: number
 }): RenderNode {
   const { els } = props.ui
-  if (!props.ui.hasClient || !('Client' in els)) return <els.Text color={COLORS.faint}>{'─'.repeat(Math.max(1, props.width))}</els.Text>
-  const loader = { isActive: props.isActive ?? true, width: props.width, color: props.color, dim: COLORS.faint }
+  if (!props.ui.hasClient || !('Client' in els))
+    return <els.Text color={props.ui.colors.faint}>{'─'.repeat(Math.max(1, props.width))}</els.Text>
+  const loader = { isActive: props.isActive ?? true, width: props.width, color: props.color, dim: props.ui.colors.faint }
   return (
     <els.Client
       key={props.connectorKey}

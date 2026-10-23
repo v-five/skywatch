@@ -77,7 +77,7 @@ skywatch/
       state/       atoms.ts (the 13 atoms, get/patch per key, migrateState) · log.ts · council.ts · bridge.ts ·
                    mission.ts (recordUsage, readUsage, costNow, contextNow, addJumpTokens) · session.ts
                    (resetAll, loadTotals, saveTotals, followSession) · view.ts (paneActions)
-      ui/          context.ts (DrawContext, UiContext, PaneData, ModuleView, uiContext) · theme.ts (colours) ·
+      ui/          context.ts (DrawContext, UiContext, PaneData, ModuleView, uiContext) · palette.ts (presets) · theme.ts (status looks) ·
                    metrics.ts (widths, hotkeys) · hazard.ts · layout.tsx (Row, RowBlock, Sep, Ruler, Blank, Stack,
                    Border) · widgets.tsx (gaugeCells, Bar, Effort, Tally, Fold, LiveClock, Connector: the only Client
                    tags) · frame.tsx (ModuleFrame) · beacon.ts · viewscreen.tsx · pane.tsx · modules/ (index
@@ -259,9 +259,10 @@ export function uiContext(pane: { els; surface; bodyColumns; now; usage; view; a
 
 ### Files
 
-- `theme.ts`: the `SPACE` palette, `COLORS`, `SVG_COLORS`, `VERDICT_STYLE`, `SHUTTLE_STATUS`, `entryColor` (writers in a `Map`).
+- `palette.ts`: the presets (`paletteOf`), each eight hazard steps (`Space`) with the roles drawn from them (`Colors`) and hex SVG colours; `parsePaletteFile` reads a palette file. The palette for a surface reaches every component through `DrawContext`/`UiContext` (`ui.colors`, `ui.space`, `ui.svg`), never through a module constant.
+- `theme.ts`: `VERDICT_STYLE` and `SHUTTLE_STATUS` name a role, not a colour; `entryColor` (writers in a `Map`).
 - `metrics.ts`: `DECK_KEYS`, `LABEL_WIDTH`, `GAUGE_WIDTH`, `FRAME_INSET`, `SEPARATOR`, `PANE_MIN_WIDTH`, `MIN_LOADER_ROOM`.
-- `hazard.ts`: `hazardOf`, `ringOf`, the scale built from `SPACE`.
+- `hazard.ts`: `hazardOf` (coloured by a palette's space, SkyWatch's by default), `ringOf`.
 - `layout.tsx`: `Row`, `RowBlock`, `Sep`, `Ruler` (`isDashed`), `Blank`, `Stack` (`items`), `Border` (`borderColor`, `borderStyle`, `isBorderDim`).
 - `widgets.tsx`: `gaugeCells`, `Bar` and `Connector` (on a `DrawContext`), `Effort`, `Tally`, `Fold`, `LiveClock`. `LiveClock` and `Connector` hold the only `Client` tags: `./clients/clock.tsx`, `./clients/loader.tsx`.
 - `frame.tsx`: `ModuleFrame` (`title`, `color`, `borderColor`, `note: NotePart[]`, `noteSlack`, `isActive`), drawn around its private `TitleRow`, which measures the note from its text.

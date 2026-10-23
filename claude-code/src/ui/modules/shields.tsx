@@ -5,7 +5,7 @@ import type { ModuleProps, ModuleView, UiContext } from '../context'
 import { ModuleFrame } from '../frame'
 import { Row, Ruler, Sep } from '../layout'
 import { DECK_KEYS, FRAME_INSET, LABEL_WIDTH } from '../metrics'
-import { COLORS, VERDICT_STYLE } from '../theme'
+import { VERDICT_STYLE } from '../theme'
 import { Tally } from '../widgets'
 import { HeldCall } from './parts'
 
@@ -20,9 +20,9 @@ function Sensors({ ui, data }: ModuleProps): RenderNode {
   const strip = data.shields.recent.slice(-Math.max(SENSORS_MIN, ui.width - LABEL_WIDTH - FRAME_INSET))
   return (
     <Row ui={ui} label="Sensors">
-      {strip.length === 0 ? <Text color={COLORS.faint}>no checks yet</Text> : null}
+      {strip.length === 0 ? <Text color={ui.colors.faint}>no checks yet</Text> : null}
       {strip.map(check => (
-        <Text color={VERDICT_STYLE[check.verdict].color} dimColor={check.inSubagent}>
+        <Text color={ui.colors[VERDICT_STYLE[check.verdict].role]} dimColor={check.inSubagent}>
           {'▰'}
         </Text>
       ))}
@@ -38,26 +38,26 @@ function Verdicts({ ui, data }: ModuleProps): RenderNode {
   return (
     <Box flexDirection="column">
       <Row ui={ui} label="Protocols">
-        <Tally ui={ui} color={COLORS.allowed} label="cleared" count={summary.rule} />
+        <Tally ui={ui} color={ui.colors.allowed} label="cleared" count={summary.rule} />
         <Sep ui={ui} />
-        <Tally ui={ui} color={COLORS.stopped} label="stopped" count={summary.deny} />
-        {data.shields.recent.some(check => check.inSubagent) ? <Text color={COLORS.faint}>{'   dim = subagents'}</Text> : null}
+        <Tally ui={ui} color={ui.colors.stopped} label="stopped" count={summary.deny} />
+        {data.shields.recent.some(check => check.inSubagent) ? <Text color={ui.colors.faint}>{'   dim = subagents'}</Text> : null}
       </Row>
       <Row ui={ui} label={data.bridge.mode === 'auto' ? 'Autopilot' : 'Airlock'}>
-        <Tally ui={ui} color={COLORS.cleared} label="cleared" count={summary.cleared} />
+        <Tally ui={ui} color={ui.colors.cleared} label="cleared" count={summary.cleared} />
         <Sep ui={ui} />
-        <Tally ui={ui} color={COLORS.stopped} label="stopped" count={summary.refused} />
+        <Tally ui={ui} color={ui.colors.stopped} label="stopped" count={summary.refused} />
         <Sep ui={ui} />
-        <Tally ui={ui} color={COLORS.waiting} label="waiting" count={summary.ask} />
+        <Tally ui={ui} color={ui.colors.waiting} label="waiting" count={summary.ask} />
       </Row>
       <Row ui={ui} label="Force field">
-        <Tally ui={ui} color={COLORS.cleared} label="cleared" count={held.ran} />
+        <Tally ui={ui} color={ui.colors.cleared} label="cleared" count={held.ran} />
         <Sep ui={ui} />
-        <Tally ui={ui} color={COLORS.stopped} label="stopped" count={held.refused} />
+        <Tally ui={ui} color={ui.colors.stopped} label="stopped" count={held.refused} />
         <Sep ui={ui} />
-        <Tally ui={ui} color={COLORS.waiting} label="waiting" count={data.held ? 1 : 0} />
+        <Tally ui={ui} color={ui.colors.waiting} label="waiting" count={data.held ? 1 : 0} />
         {data.hasBlockDirective ? <Sep ui={ui} /> : null}
-        {data.hasBlockDirective ? <Tally ui={ui} color={COLORS.blocked} label="blocked" count={held.blocked} /> : null}
+        {data.hasBlockDirective ? <Tally ui={ui} color={ui.colors.blocked} label="blocked" count={held.blocked} /> : null}
       </Row>
     </Box>
   )
@@ -100,8 +100,8 @@ function CheckRow({ ui, check }: { ui: UiContext; check: Check }): RenderNode {
   const style = VERDICT_STYLE[check.verdict]
   return (
     <Row ui={ui} label="">
-      <Text color={style.color}>{'▰ '}</Text>
-      <Text color={COLORS.dim}>{`${style.word.padEnd(VERDICT_WORD_WIDTH)} `}</Text>
+      <Text color={ui.colors[style.role]}>{'▰ '}</Text>
+      <Text color={ui.colors.dim}>{`${style.word.padEnd(VERDICT_WORD_WIDTH)} `}</Text>
       <Text dimColor={check.inSubagent}>{check.detail}</Text>
     </Row>
   )
@@ -132,8 +132,8 @@ function ShieldsModule(props: ModuleProps): RenderNode {
     <ModuleFrame
       ui={ui}
       title="⛨ Shields"
-      color={COLORS.shields}
-      borderColor={data.held ? COLORS.held : COLORS.shields}
+      color={ui.colors.shields}
+      borderColor={data.held ? ui.colors.held : ui.colors.shields}
       isActive={summary.ask > 0 || data.held !== null}
       note={[{ text: note, isDim: true }]}
     >

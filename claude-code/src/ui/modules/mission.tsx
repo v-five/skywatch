@@ -6,7 +6,6 @@ import type { ModuleProps, ModuleView, UiContext } from '../context'
 import { ModuleFrame } from '../frame'
 import { Row, Ruler, Sep } from '../layout'
 import { LABEL_WIDTH } from '../metrics'
-import { COLORS } from '../theme'
 import { Bar, LiveClock } from '../widgets'
 
 const LIMITS_SHOWN = 2
@@ -66,9 +65,9 @@ function Jumps({ ui, data }: ModuleProps): RenderNode | null {
           <Box width={LABEL_WIDTH} flexShrink={0}>
             <Text dimColor>Jump</Text>
           </Box>
-          <Text color={COLORS.bridge}>{'◐ '}</Text>
+          <Text color={ui.colors.bridge}>{'◐ '}</Text>
           <Box flexShrink={0}>
-            <LiveClock ui={ui} clockKey="jump-clock" since={jump.startedAt} endAt={null} color={COLORS.bridge} />
+            <LiveClock ui={ui} clockKey="jump-clock" since={jump.startedAt} endAt={null} color={ui.colors.bridge} />
           </Box>
           <Text wrap="truncate">
             <Sep ui={ui} />
@@ -78,12 +77,12 @@ function Jumps({ ui, data }: ModuleProps): RenderNode | null {
       ) : null}
       {lastJump ? (
         <Row ui={ui} label="Last jump">
-          <Text color={isAnswer ? COLORS.shields : COLORS.alert}>{isAnswer ? '✓ ' : '✗ '}</Text>
+          <Text color={isAnswer ? ui.colors.shields : ui.colors.alert}>{isAnswer ? '✓ ' : '✗ '}</Text>
           <Text>{fmtDuration(lastJump.durationMs)}</Text>
           <Sep ui={ui} />
           <Text dimColor>{counts}</Text>
           {lastJump.costDelta !== null ? <Sep ui={ui} /> : null}
-          {lastJump.costDelta !== null ? <Text color={COLORS.bridge}>{`+${fmtUsd(lastJump.costDelta)}`}</Text> : null}
+          {lastJump.costDelta !== null ? <Text color={ui.colors.bridge}>{`+${fmtUsd(lastJump.costDelta)}`}</Text> : null}
         </Row>
       ) : null}
     </Box>
@@ -95,10 +94,10 @@ function MissionModule(props: ModuleProps): RenderNode {
   const { ui, data } = props
   const { Text } = ui.els
   return (
-    <ModuleFrame ui={ui} title="✧ Mission" color={COLORS.dim} isActive={data.bridge.isRunning}>
+    <ModuleFrame ui={ui} title="✧ Mission" color={ui.colors.dim} isActive={data.bridge.isRunning}>
       <Totals {...props} />
       <Jumps {...props} />
-      {data.jump.isReviewing ? <Text color={COLORS.council}>{'architect reviewing before done (inferred)'}</Text> : null}
+      {data.jump.isReviewing ? <Text color={ui.colors.council}>{'architect reviewing before done (inferred)'}</Text> : null}
     </ModuleFrame>
   )
 }

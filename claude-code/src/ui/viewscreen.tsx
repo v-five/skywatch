@@ -5,7 +5,6 @@ import { lastDelta } from '../domain'
 import type { DrawContext } from './context'
 import { hazardOf } from './hazard'
 import { SEPARATOR } from './metrics'
-import { COLORS } from './theme'
 import { Bar, Connector } from './widgets'
 
 const LOADER_WIDTH = 12
@@ -34,7 +33,7 @@ function lastJumpParts(usage: Usage, bridge: Bridge, lastJump: LastJump | null):
 export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump }: ViewscreenProps): RenderNode {
   const { Box, Text } = draw.els
   const pct = Math.round(usage.pct ?? 0)
-  const hazard = hazardOf(pct)
+  const hazard = hazardOf(pct, draw.space)
   const last = lastJumpParts(usage, bridge, lastJump)
   return (
     // In the terminal the band sits right under the transcript, so it keeps a row of space above.
@@ -44,7 +43,7 @@ export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump
         <Bar ui={draw} pct={pct} />
         <Text bold>{`  ${pct}%`}</Text>
         {usage.window ? <Text dimColor>{`  ${kTokens(usage.tokens ?? 0)} / ${kTokens(usage.window)}`}</Text> : null}
-        {last.length > 0 ? <Text color={COLORS.faint}>{SEPARATOR}</Text> : null}
+        {last.length > 0 ? <Text color={draw.colors.faint}>{SEPARATOR}</Text> : null}
         {last.length > 0 ? <Text dimColor wrap="truncate">{`Last jump ${last.join(' · ')}`}</Text> : null}
       </Box>
       {draw.hasClient && bodyColumns >= LOADER_MIN_COLUMNS ? (

@@ -2,7 +2,7 @@ import type { RenderNode } from 'claude-code'
 import { shorten } from '../../../core'
 import { flightPaths, shuttleLabel } from '../../../domain'
 import type { ModuleProps } from '../../context'
-import { SHUTTLE_STATUS, SVG_COLORS } from '../../theme'
+import { SHUTTLE_STATUS } from '../../theme'
 
 const SHOWN = 10
 const ROW_HEIGHT = 18
@@ -33,8 +33,8 @@ export function FlightPaths({ ui, data }: ModuleProps): RenderNode | null {
     const width = Math.max(BAR_MIN_PX, ((path?.bar ?? 1) / AXIS_CELLS) * AXIS_PX)
     const label = shorten(shuttleLabel(shuttle), LABEL_MAX).replace(/[<&>]/g, '')
     return (
-      `<text x="${LABEL_X}" y="${i * ROW_HEIGHT + LABEL_BASELINE}" font-size="${FONT_SIZE}" fill="${SVG_COLORS.label}">${label}</text>` +
-      `<rect x="${barX}" y="${i * ROW_HEIGHT + BAR_TOP}" width="${width}" height="${BAR_HEIGHT}" rx="${BAR_RADIUS}" fill="${SHUTTLE_STATUS[shuttle.status].svgFill}"/>`
+      `<text x="${LABEL_X}" y="${i * ROW_HEIGHT + LABEL_BASELINE}" font-size="${FONT_SIZE}" fill="${ui.svg.label}">${label}</text>` +
+      `<rect x="${barX}" y="${i * ROW_HEIGHT + BAR_TOP}" width="${width}" height="${BAR_HEIGHT}" rx="${BAR_RADIUS}" fill="${ui.svg[SHUTTLE_STATUS[shuttle.status].svg]}"/>`
     )
   })
   const height = fleet.length * ROW_HEIGHT + SVG_PADDING

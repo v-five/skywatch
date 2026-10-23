@@ -5,10 +5,16 @@ import type { PaneActions } from '../domain'
 import type { ActiveHold } from '../forcefield'
 import { hazardOf } from './hazard'
 import { PANE_MIN_WIDTH } from './metrics'
-import { COLORS } from './theme'
+import type { Colors, Palette, Space, SvgColors } from './palette'
 
-/** What a drawing outside the pane needs: the surface's elements, and whether it runs client modules. */
-export type DrawContext = { readonly els: ElementTable; readonly hasClient: boolean }
+/** What a drawing outside the pane needs: the surface's elements, its palette, and whether it runs client modules. */
+export type DrawContext = {
+  readonly els: ElementTable
+  readonly hasClient: boolean
+  readonly colors: Colors
+  readonly space: Space
+  readonly svg: SvgColors
+}
 
 /** What every pane component draws with: the elements, the clock, the pane's width and its actions. */
 export type UiContext = DrawContext & {
@@ -46,8 +52,8 @@ export type ModuleProps = { readonly ui: UiContext; readonly data: PaneData }
 export type ModuleView = { isEmpty(data: PaneData): boolean; draw(props: ModuleProps): RenderNode }
 
 /** `canAnimate` is false once a client module has failed in this load: the surface then draws without any. */
-export function drawContext(els: ElementTable, canAnimate = true): DrawContext {
-  return { els, hasClient: canAnimate && 'Client' in els }
+export function drawContext(els: ElementTable, palette: Palette, canAnimate = true): DrawContext {
+  return { els, hasClient: canAnimate && 'Client' in els, colors: palette.colors, space: palette.space, svg: palette.svg }
 }
 
 /** The pane's drawing context from what the surface asked for and the session's readings. */
@@ -61,13 +67,15 @@ export function uiContext(pane: {
   actions: PaneActions
   canAnimate: boolean
   places: Places
+  palette: Palette
 }): UiContext {
+  const draw = drawContext(pane.els, pane.palette, pane.canAnimate)
   return {
-    ...drawContext(pane.els, pane.canAnimate),
+    ...draw,
     surface: pane.surface,
     now: pane.now,
     width: Math.max(PANE_MIN_WIDTH, pane.bodyColumns),
-    hazardColor: pane.usage.pct !== null ? hazardOf(pane.usage.pct).color : COLORS.bridge,
+    hazardColor: pane.usage.pct !== null ? hazardOf(pane.usage.pct, draw.space).color : draw.colors.bridge,
     view: pane.view,
     actions: pane.actions,
     places: pane.places,

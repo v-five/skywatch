@@ -1,6 +1,8 @@
 import type { RenderSurface } from 'claude-code'
-import { type Config, NO_PLACES, type Places } from '../core'
+import { type Config, NO_PLACES, type Places, surfaceGroupOf } from '../core'
 import { type ActiveHold, DEFAULT_DIRECTIVES, type DirectiveSet, type Held, isActiveHold } from '../forcefield'
+import { type Palette, paletteOf } from '../ui'
+import type { PaletteFiles } from './palette'
 
 /** What one load of the mod keeps in memory: none of it is state the pane must find after a reload. */
 export type Runtime = {
@@ -14,6 +16,8 @@ export type Runtime = {
   readonly held: Map<string, Held>
   /** Where paths read relative from: the session's folder and home, once the session has started. */
   places: Places
+  /** The palette files' colours and unread lines, read when the session starts. */
+  paletteFiles: PaletteFiles
   /** A client module failed in this load: drawings leave client modules out until a reload. */
   hasClientFault: boolean
 }
@@ -26,6 +30,7 @@ export function createRuntime(config: Config): Runtime {
     modeSeen: null,
     held: new Map(),
     places: NO_PLACES,
+    paletteFiles: { overrides: {}, errors: [] },
     hasClientFault: false,
   }
 }
@@ -33,6 +38,11 @@ export function createRuntime(config: Config): Runtime {
 /** The held call whose prompt is up, the oldest first. */
 export function heldNow(runtime: Runtime): ActiveHold | null {
   return [...runtime.held.values()].find(isActiveHold) ?? null
+}
+
+/** The palette a surface draws with: its configured preset, then the palette files. */
+export function paletteFor(runtime: Runtime, surface: RenderSurface | null): Palette {
+  return paletteOf(runtime.config.palette[surfaceGroupOf(surface)], runtime.paletteFiles.overrides)
 }
 
 export function hasBlockDirective(runtime: Runtime): boolean {

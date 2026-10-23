@@ -3,10 +3,11 @@ import { isHazardMode } from '../core'
 import { withCommand, withHazards } from '../domain'
 import { directivesReport, loadDirectives } from '../forcefield'
 import { patchBridge, patchView, resetAll } from '../state'
+import { paletteReport } from './palette'
 import type { Runtime } from './runtime'
 import { hazardsNow, openPane, PANE_ID, refreshStatus, remeasure } from './status'
 
-const USAGE = 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives]'
+const USAGE = 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives|palette]'
 const HAZARDS_USAGE = 'Usage: /skywatch hazards viewscreen|beacon|off'
 const LAUNCHED = 'SkyWatch launched. Focus it with ctrl+x tab; 1-9 open docked shuttles, deck letters open their lists.'
 
@@ -40,6 +41,8 @@ async function runSkywatch($: EngineInterface, runtime: Runtime, args: string): 
       return 'SkyWatch recalibrated.'
     case 'hazards':
       return runHazards($, runtime, argument)
+    case 'palette':
+      return paletteReport(runtime.config.palette, runtime.paletteFiles)
     case 'directives':
       runtime.directives = await loadDirectives($)
       return directivesReport(runtime.directives)

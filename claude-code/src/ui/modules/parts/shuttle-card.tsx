@@ -5,7 +5,7 @@ import { isEffort, shuttleName } from '../../../domain'
 import type { UiContext } from '../../context'
 import { Blank, Border, Row, RowBlock, Ruler, Sep } from '../../layout'
 import { FOLD_MARK, FRAME_INSET, LABEL_WIDTH, MIN_LOADER_ROOM } from '../../metrics'
-import { COLORS, SHUTTLE_STATUS } from '../../theme'
+import { SHUTTLE_STATUS } from '../../theme'
 import { Connector, Effort, Fold, LiveClock } from '../../widgets'
 
 const MAX_TOKENS = 'max_tokens'
@@ -35,7 +35,7 @@ function ShuttleTitle({ ui, shuttle, index, isFolded }: CardProps & { isFolded: 
   return (
     <Box justifyContent="space-between">
       <Box flexShrink={1}>
-        <Text color={isFolded ? COLORS.dim : COLORS.shuttles} bold={!isFolded} wrap="truncate">
+        <Text color={isFolded ? ui.colors.dim : ui.colors.shuttles} bold={!isFolded} wrap="truncate">
           {shorten(name, nameWidth)}
         </Text>
       </Box>
@@ -45,10 +45,16 @@ function ShuttleTitle({ ui, shuttle, index, isFolded }: CardProps & { isFolded: 
         </Box>
       ) : null}
       <Box flexShrink={0}>
-        <Text color={shuttle.lastStop === MAX_TOKENS ? COLORS.alert : style.color}>{`${style.glyph} ${status}`}</Text>
+        <Text color={shuttle.lastStop === MAX_TOKENS ? ui.colors.alert : ui.colors[style.role]}>{`${style.glyph} ${status}`}</Text>
         {isFolded ? <Text dimColor>{'  '}</Text> : null}
         {isFolded ? (
-          <LiveClock ui={ui} clockKey={`fold-clock-${shuttle.id}`} since={shuttle.spawnedAt} endAt={shuttle.endedAt} color={COLORS.dim} />
+          <LiveClock
+            ui={ui}
+            clockKey={`fold-clock-${shuttle.id}`}
+            since={shuttle.spawnedAt}
+            endAt={shuttle.endedAt}
+            color={ui.colors.dim}
+          />
         ) : null}
         {isInFlight ? null : <Text> </Text>}
         {isInFlight ? null : (
@@ -87,7 +93,7 @@ function CardGauges({ ui, shuttle, bridgeModel }: CardProps): RenderNode {
             clockKey={`shuttle-clock-${shuttle.id}`}
             since={shuttle.spawnedAt}
             endAt={shuttle.endedAt}
-            color={COLORS.dim}
+            color={ui.colors.dim}
           />
         </Box>
       </Box>
@@ -108,7 +114,7 @@ function CardReading({ ui, shuttle }: CardProps): RenderNode {
             foldKey={`answer-${shuttle.id}`}
             text={relativePaths(shuttle.answer, ui.places)}
             width={ui.width - FRAME_INSET - LABEL_WIDTH}
-            color={COLORS.text}
+            color={ui.colors.text}
           />
         ) : (
           <Text dimColor>no report</Text>
@@ -119,7 +125,7 @@ function CardReading({ ui, shuttle }: CardProps): RenderNode {
   return (
     <RowBlock ui={ui} label="Scanning">
       {reading ? (
-        <Text color={COLORS.shuttles} bold wrap="wrap">
+        <Text color={ui.colors.shuttles} bold wrap="wrap">
           {reading}
         </Text>
       ) : (
@@ -149,7 +155,7 @@ function CardCalls({ ui, shuttle }: CardProps): RenderNode {
             foldKey={`last-${shuttle.id}`}
             text={lastTool.text}
             width={inner}
-            color={lastTool.isError ? COLORS.alert : undefined}
+            color={lastTool.isError ? ui.colors.alert : undefined}
             isDim={!lastTool.isError}
           />
         </RowBlock>
@@ -162,7 +168,7 @@ function CardCalls({ ui, shuttle }: CardProps): RenderNode {
 export function ShuttleCard(props: CardProps): RenderNode {
   const { ui, shuttle } = props
   const isFolded = shuttle.status !== 'running' && ui.view.expanded !== shuttle.id
-  const border = shuttle.lastStop === MAX_TOKENS ? COLORS.alert : COLORS.shuttles
+  const border = shuttle.lastStop === MAX_TOKENS ? ui.colors.alert : ui.colors.shuttles
   if (isFolded) {
     return (
       <Border ui={ui} borderColor={border} isBorderDim>

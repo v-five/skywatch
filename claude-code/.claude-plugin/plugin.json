@@ -25,7 +25,7 @@
   "userConfig": {
     "modules": {
       "title": "Modules",
-      "description": "Comma-separated modules in display order: bridge, council, shields, shuttles, probes, mission, blackbox. Leave one out to hide it.",
+      "description": "Comma-separated modules in display order: bridge, council, shields, shuttles, probes, mission, blackbox. Leave one out to hide it. Give each surface its own with app=…; terminal=…",
       "type": "string",
       "default": "bridge,council,shields,shuttles,probes,mission,blackbox"
     },
@@ -51,6 +51,12 @@
         "off"
       ],
       "default": "beacon"
+    },
+    "palette": {
+      "title": "Palette",
+      "description": "Colours: skywatch, terminal (the terminal's own 16 colours), claude (Claude Code's theme), catppuccin-mocha, catppuccin-macchiato, catppuccin-frappe, catppuccin-latte, dracula, nord, gruvbox or tokyo-night. Give each surface its own with app=…; terminal=…. ~/.claude/skywatch.palette and the project's .claude/skywatch.palette recolour single parts.",
+      "type": "string",
+      "default": "skywatch"
     }
   }
 }
