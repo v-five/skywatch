@@ -1,7 +1,7 @@
 {
   "name": "skywatch",
   "displayName": "SkyWatch",
-  "version": "0.31.5",
+  "version": "0.31.6",
   "description": "A starbase for your Claude Code session: a hazard scale for the context above the prompt, and a pane with the bridge's readings, shields that hold or block risky commands by your directives, a card per shuttle, the mission's totals and a black box.",
   "author": {
     "name": "v-five",
