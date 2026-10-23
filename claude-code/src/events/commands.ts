@@ -2,9 +2,9 @@ import type { EngineInterface, On } from 'claude-code'
 import { isHazardMode } from '../core'
 import { withCommand, withHazards } from '../domain'
 import { directivesReport, loadDirectives } from '../forcefield'
-import { patchBridge, patchView, readUsage, recordUsage, resetAll } from '../state'
+import { patchBridge, patchView, resetAll } from '../state'
 import type { Runtime } from './runtime'
-import { hazardsNow, openPane, PANE_ID, refreshStatus } from './status'
+import { hazardsNow, openPane, PANE_ID, refreshStatus, remeasure } from './status'
 
 const USAGE = 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives]'
 const HAZARDS_USAGE = 'Usage: /skywatch hazards viewscreen|beacon|off'
@@ -51,10 +51,7 @@ async function runSkywatch($: EngineInterface, runtime: Runtime, args: string): 
 /** After any slash command: the bridge clears it, and the hull is read fresh. */
 async function endCommand($: EngineInterface, runtime: Runtime): Promise<void> {
   await patchBridge($, bridge => withCommand(bridge, null))
-  const reading = await readUsage($)
-  if (reading) await recordUsage($, reading)
-  await refreshStatus($, runtime)
-  $.ui.invalidate('ui.render')
+  await remeasure($, runtime)
 }
 
 export function registerCommands(on: On, runtime: Runtime): void {

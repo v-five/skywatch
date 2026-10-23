@@ -1,7 +1,7 @@
 import type { EngineInterface, UiOpenResult } from 'claude-code'
 import type { HazardMode } from '../../types'
 import { effectiveHazards } from '../domain'
-import { getCouncil, getShields, getShuttles, getUsage, getView } from '../state'
+import { getCouncil, getShields, getShuttles, getUsage, getView, readUsage, recordUsage } from '../state'
 import { beaconText } from '../ui'
 import type { Runtime } from './runtime'
 
@@ -30,4 +30,12 @@ export async function refreshStatus($: EngineInterface, runtime: Runtime): Promi
   const isBeacon = (await hazardsNow($, runtime)) === 'beacon'
   $.ui.status(isBeacon && !isTerminal ? await readBeacon($) : undefined)
   if (isTerminal) $.ui.invalidate('ui.render')
+}
+
+/** Reads the hull fresh outside a jump (after a command or a compaction) and redraws. */
+export async function remeasure($: EngineInterface, runtime: Runtime): Promise<void> {
+  const reading = await readUsage($)
+  if (reading) await recordUsage($, reading)
+  await refreshStatus($, runtime)
+  $.ui.invalidate('ui.render')
 }

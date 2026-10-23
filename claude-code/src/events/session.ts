@@ -3,7 +3,7 @@ import { usageFrom, withCommand } from '../domain'
 import { loadDirectives } from '../forcefield'
 import { loadTotals, migrateState, patchBridge, patchUsage, readUsage, recordUsage, resetAll } from '../state'
 import type { Runtime } from './runtime'
-import { openPane, refreshStatus } from './status'
+import { openPane, refreshStatus, remeasure } from './status'
 
 async function startSession($: EngineInterface, runtime: Runtime): Promise<void> {
   runtime.directives = await loadDirectives($).catch(() => runtime.directives)
@@ -34,6 +34,12 @@ export function registerSession(on: On, runtime: Runtime): void {
       await resetAll($)
       await refreshStatus($, runtime)
     }
+    return next(e)
+  })
+
+  // Every compaction ends here, manual or automatic, whether or not a slash command ran it.
+  on('classic.PostCompact', async ($, e, next) => {
+    await remeasure($, runtime).catch(() => undefined)
     return next(e)
   })
 

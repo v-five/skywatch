@@ -1,4 +1,4 @@
-import type { Args, On } from 'claude-code'
+import type { Args, On, SessionContextBreakdown, SessionContextUsage } from 'claude-code'
 import { type MockClock, mock } from 'claude-code/testing'
 import { HOME_SCRIPT } from '../../src/forcefield'
 
@@ -8,7 +8,8 @@ export const CWD = '/work/project'
 export const HOME = '/home/captain'
 
 export type RunAnswer = { exitCode: number; stdout: string }
-export type UsageAnswer = { percent: number; tokens: number; window: number; usd: number }
+/** `tokens` and `percent` are absent before a response counts the window (a fresh or just-compacted one); `estimated` answers a breakdown. */
+export type UsageAnswer = { percent?: number; tokens?: number; window: number; usd: number; estimated?: number }
 
 export type WorldOptions = {
   now?: number
@@ -60,6 +61,30 @@ export function runTools(on: On, fails: (call: Args<'tool.call'>) => boolean = (
   on('tool.call', (_, e) => (fails(e) ? { result: {}, isError: true } : { result: {} }))
 }
 
+/** The counted fill, left out before a response counts it. */
+function counted(usage: UsageAnswer): Pick<SessionContextUsage, 'percent' | 'tokens'> {
+  return usage.tokens === undefined || usage.percent === undefined ? {} : { percent: usage.percent, tokens: usage.tokens }
+}
+
+/** A breakdown that only totals: what the mod reads of an estimate. */
+function estimatedBreakdown(totalTokens: number, window: number): SessionContextBreakdown {
+  return {
+    categories: [],
+    totalTokens,
+    maxTokens: window,
+    rawMaxTokens: window,
+    autocompactSource: 'auto',
+    percentage: (totalTokens / window) * 100,
+    gridRows: [],
+    model: 'test-model',
+    memoryFiles: [],
+    mcpTools: [],
+    agents: [],
+    isAutoCompactEnabled: true,
+    apiUsage: null,
+  }
+}
+
 /** Answers the engine's nouns beneath the mod: clock, store, ui, session, fs and process. */
 export function world(on: On, options: WorldOptions = {}): MockClock {
   const clock = mock.clock(on, { now: options.now ?? NOW })
@@ -78,13 +103,14 @@ export function world(on: On, options: WorldOptions = {}): MockClock {
   on('command.register', () => ({ value: { command: 'skywatch' } }))
   on('session.id', () => ({ value: SESSION_ID }))
   on('session.cwd', () => ({ value: CWD }))
-  on('session.usage', () => {
+  on('session.usage', (_, e) => {
     if (!usage) throw new Error('no usage on this host')
     const resetsAt = new Date(NOW + 3_600_000).toISOString()
+    const breakdown = e?.breakdown && usage.estimated !== undefined ? { breakdown: estimatedBreakdown(usage.estimated, usage.window) } : {}
     return {
       value: {
         startedAt: NOW,
-        context: { percent: usage.percent, tokens: usage.tokens, window: usage.window },
+        context: { ...counted(usage), window: usage.window, ...breakdown },
         rateLimits: [{ kind: 'five_hour', percentUsed: 30, resetsAt }],
         cost: { usd: usage.usd },
       },

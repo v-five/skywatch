@@ -75,4 +75,31 @@ describe('other slash commands', () => {
     expect(await after.find({ type: 'Text', text: '○ standby' })).toBeDefined()
     await after.unmount()
   })
+
+  test('after a compaction the hull reads the estimate, before any response counts it', async ($, on) => {
+    const usage = { percent: 45, tokens: 453_000, window: 1_000_000, usd: 1 }
+    world(on, { usage })
+    on('command.run', () => {
+      Object.assign(usage, { percent: undefined, tokens: undefined, estimated: 90_000 })
+      return { text: '' }
+    })
+    await $.session.start(START)
+    await $.command.run(slashCommand('compact'))
+    const pane = await $.ui.mount(paneRequest())
+    expect(await pane.find({ type: 'Text', text: '  9%' })).toBeDefined()
+    expect(await pane.find({ type: 'Text', text: /context compacted \(453k → 90k\)/ })).toBeDefined()
+    await pane.unmount()
+  })
+
+  test('an automatic compaction reads the hull fresh too, with no command around it', async ($, on) => {
+    const usage = { percent: 80, tokens: 800_000, window: 1_000_000, usd: 1 }
+    world(on, { usage })
+    on('classic.PostCompact', () => ({}))
+    await $.session.start(START)
+    Object.assign(usage, { percent: undefined, tokens: undefined, estimated: 120_000 })
+    await $.classic.PostCompact({ trigger: 'auto', compact_summary: 'summary' })
+    const pane = await $.ui.mount(paneRequest())
+    expect(await pane.find({ type: 'Text', text: '  12%' })).toBeDefined()
+    await pane.unmount()
+  })
 })

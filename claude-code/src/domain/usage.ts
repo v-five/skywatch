@@ -30,6 +30,13 @@ export function usageFrom(usage: Usage, reading: UsageReading): Usage {
   }
 }
 
+/** A reading whose context had no response to count it yet (a fresh or just-compacted window), filled from an estimate. */
+export function withEstimatedContext(reading: UsageReading, estimatedTokens: number): UsageReading {
+  const { window } = reading.context
+  const percent = window > 0 ? Math.round((estimatedTokens / window) * 100) : null
+  return { ...reading, context: { ...reading.context, tokens: estimatedTokens, percent } }
+}
+
 /** A compaction, read from the context: more than 20k tokens, then less than half of it. */
 export function compactionOf(before: number | null, after: number | null): { before: number; after: number } | null {
   if (before === null || after === null) return null

@@ -8,14 +8,24 @@ import {
   usageFrom,
   WRITERS,
   withCompaction,
+  withEstimatedContext,
   withJumpTokens,
   withRequestTokens,
 } from '../domain'
 import { getUsage, patchJump, patchTotals, patchUsage } from './atoms'
 import { logEntry } from './log'
 
+/** The reading as given, or with its context estimated when no response has counted it since a compaction. */
+async function withContext($: EngineInterface, reading: UsageReading): Promise<UsageReading> {
+  if (reading.context.tokens != null) return reading
+  const estimate = await $.session.usage({ breakdown: 'summary' }).catch(() => null)
+  const total = estimate?.context.breakdown?.totalTokens
+  return total === undefined ? reading : withEstimatedContext(reading, total)
+}
+
 /** Stores a usage reading; a compaction is read from the context, as installed mods cannot hook it. */
-export async function recordUsage($: EngineInterface, reading: UsageReading): Promise<void> {
+export async function recordUsage($: EngineInterface, given: UsageReading): Promise<void> {
+  const reading = await withContext($, given)
   const compaction = compactionOf((await getUsage($)).tokens, reading.context.tokens ?? null)
   if (compaction) {
     const at = await $.clock.now()
