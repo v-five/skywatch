@@ -59,3 +59,39 @@ export function keyedEntries(entries: readonly BlackboxEntry[], viewedAgentId: s
   })
   return (viewedAgentId ? keyed.filter(({ entry }) => entry.agentId === viewedAgentId) : keyed).reverse()
 }
+
+/** Repeats this many or more fold into one row. */
+const RUN_MIN = 3
+const CALL_LINE = /^(\S+) → (.+)$/
+
+/** A row of the black box: one entry, or a run of the same writer making the same call on different targets. */
+export type EntryRow = { keyed: KeyedEntry; run: { verb: string; targets: string[] } | null }
+
+function callOf(entry: BlackboxEntry): { verb: string; target: string } | null {
+  if (entry.kind !== 'info' || entry.cost) return null
+  const match = CALL_LINE.exec(entry.text)
+  return match?.[1] && match[2] ? { verb: match[1], target: match[2] } : null
+}
+
+/** Where a run that starts at `start` ends: the first entry by another writer or with another call. */
+function runEnd(keyed: readonly KeyedEntry[], start: number, verb: string): number {
+  const who = keyed[start]?.entry.who
+  const end = keyed.findIndex((row, i) => i > start && (row.entry.who !== who || callOf(row.entry)?.verb !== verb))
+  return end === -1 ? keyed.length : end
+}
+
+/** Consecutive entries by one writer with the same call (Write → a, Write → b, …) fold into one row, newest first. */
+export function entryRows(keyed: readonly KeyedEntry[]): EntryRow[] {
+  const rows: EntryRow[] = []
+  for (let i = 0; i < keyed.length; ) {
+    const first = keyed[i]
+    if (!first) break
+    const call = callOf(first.entry)
+    const end = call ? runEnd(keyed, i, call.verb) : i + 1
+    const isRun = call !== null && end - i >= RUN_MIN
+    const targets = keyed.slice(i, end).map(({ entry }) => callOf(entry)?.target ?? '')
+    rows.push({ keyed: first, run: isRun ? { verb: call.verb, targets } : null })
+    i = isRun ? end : i + 1
+  }
+  return rows
+}

@@ -12,7 +12,7 @@ const TOOL_NOTES_MAX = 3
 const PROBES_MAX = 60
 const ANSWER_MAX = 400
 const BRIEF_MAX = 600
-const WRITER_MAX = 20
+const WRITER_MAX = 18
 const PROBE_ACTIVE_MS = 15_000
 
 /** A shuttle at launch: its title made from the mission and numbered past the fleet's, its brief redacted and cut. */

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'claude-code/testing'
 import { capitalize } from '../../src/core'
-import { appendEntry, attachCost, keyedEntries, newEntry, promptLine } from '../../src/domain'
+import { appendEntry, attachCost, entryRows, keyedEntries, newEntry, promptLine } from '../../src/domain'
 import type { BlackboxEntry } from '../../types'
 import { PROMPTS } from '../support/corpus'
 import { GOLDEN } from '../support/golden'
@@ -39,5 +39,23 @@ describe('black box', () => {
     expect(keyedEntries(list, null).map(k => k.foldKey)).toEqual(['log-42-captain-1', 'log-42-captain'])
     const longer = keyedEntries([...list, entry(50, 'bridge')], null)
     expect(longer.map(k => k.foldKey)).toEqual(['log-50-bridge', 'log-42-captain-1', 'log-42-captain'])
+  })
+})
+
+describe('rows', () => {
+  test('three or more of the same call by one writer fold into a run, newest first', () => {
+    const write = (at: number, file: string, who = 'bridge') => newEntry(at, who, `Write → ${file}`, 'info', null)
+    const entries = [
+      write(1, 'a.ts'),
+      write(2, 'b.ts'),
+      write(3, 'c.ts'),
+      newEntry(4, 'captain', 'ok', 'info', null),
+      write(5, 'd.ts'),
+      write(6, 'e.ts'),
+    ]
+    const rows = entryRows(keyedEntries(entries, null))
+    expect(
+      rows.map(row => (row.run ? `${row.run.verb} ×${row.run.targets.length}: ${row.run.targets.join(',')}` : row.keyed.entry.text)),
+    ).toEqual(['Write → e.ts', 'Write → d.ts', 'ok', 'Write ×3: c.ts,b.ts,a.ts'])
   })
 })
