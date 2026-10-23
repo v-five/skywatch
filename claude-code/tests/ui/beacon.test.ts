@@ -39,4 +39,17 @@ describe('beacon', () => {
       '☁ Gas cloud · ◑ 54% · shuttles 1/1 · council transmitting · stopped 1',
     )
   })
+
+  test('a prompt waiting for an answer shows right after the hazard', () => {
+    const asked = recordCheck(DEFAULT_SHIELDS, {
+      id: 'c',
+      tool: 'Bash',
+      deck: 'shell',
+      verdict: 'ask',
+      inSubagent: false,
+      detail: '',
+      at: 1,
+    })
+    expect(beaconText({ ...base, shields: asked })).toBe('✦ Clear space · ○ 0% · ⚠ airlock 1 waiting')
+  })
 })

@@ -51,7 +51,8 @@ async function recordVerdict(
     at: await $.clock.now(),
   }
   await patchShields($, shields => recordCheck(shields, check))
-  // The status line updates when the call settles; only a refusal ends here.
+  // The status line updates when a prompt goes up and when the call settles; a refusal ends here.
+  if (decision === 'ask') await refreshStatus($, runtime)
   if (blockedBy !== null) {
     await logEntry($, WRITERS.shields, `blocked by directive "${blockedBy}" · ${check.detail}`, 'error')
     await patchShields($, shields => countHeld(shields, 'blocked'))

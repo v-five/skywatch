@@ -1,7 +1,8 @@
 import type { RenderNode, RenderSurface } from 'claude-code'
-import type { Bridge, LastJump, Usage } from '../../types'
+import type { Bridge, LastJump, Shields, Usage } from '../../types'
 import { fmtDuration, kTokens } from '../core'
-import { lastDelta } from '../domain'
+import { lastDelta, shieldsSummary } from '../domain'
+import { AIRLOCK_MARK } from './beacon'
 import type { DrawContext } from './context'
 import { hazardOf } from './hazard'
 import { SEPARATOR } from './metrics'
@@ -18,6 +19,7 @@ type ViewscreenProps = {
   usage: Usage
   bridge: Bridge
   lastJump: LastJump | null
+  shields: Shields
 }
 
 function lastJumpParts(usage: Usage, bridge: Bridge, lastJump: LastJump | null): string[] {
@@ -30,11 +32,12 @@ function lastJumpParts(usage: Usage, bridge: Bridge, lastJump: LastJump | null):
 }
 
 /** The band above the prompt: the hazard, how full the context is, and the last jump; a loader while working. */
-export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump }: ViewscreenProps): RenderNode {
+export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump, shields }: ViewscreenProps): RenderNode {
   const { Box, Text } = draw.els
   const pct = Math.round(usage.pct ?? 0)
   const hazard = hazardOf(pct, draw.space)
   const last = lastJumpParts(usage, bridge, lastJump)
+  const waiting = shieldsSummary(shields).ask
   return (
     // In the terminal the band sits right under the transcript, so it keeps a row of space above.
     <Box flexDirection="row" justifyContent="space-between" paddingX={1} marginTop={surface === 'terminal' ? 1 : 0}>
@@ -42,6 +45,7 @@ export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump
         <Text color={hazard.color} bold>{`${hazard.icon}  ${hazard.word}  `}</Text>
         <Bar ui={draw} pct={pct} />
         <Text bold>{`  ${pct}%`}</Text>
+        {waiting > 0 ? <Text color={draw.colors.waiting} bold>{`  ${AIRLOCK_MARK} Airlock ${waiting} waiting`}</Text> : null}
         {usage.window ? <Text dimColor>{`  ${kTokens(usage.tokens ?? 0)} / ${kTokens(usage.window)}`}</Text> : null}
         {last.length > 0 ? <Text color={draw.colors.faint}>{SEPARATOR}</Text> : null}
         {last.length > 0 ? <Text dimColor wrap="truncate">{`Last jump ${last.join(' · ')}`}</Text> : null}

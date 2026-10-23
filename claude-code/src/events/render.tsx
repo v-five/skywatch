@@ -82,7 +82,7 @@ export function registerRender(on: On, runtime: Runtime): void {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if ((await hazardsNow($, runtime)) !== 'viewscreen' || e.props.hasSurvey) return next(e)
-    const [usage, bridge, lastJump] = await Promise.all([getUsage($), getBridge($), getLastJump($)])
+    const [usage, bridge, lastJump, shields] = await Promise.all([getUsage($), getBridge($), getLastJump($), getShields($)])
     return (
       <Viewscreen
         draw={drawContext($.ui.resolve(e), paletteFor(runtime, e.surface), !runtime.hasClientFault)}
@@ -91,6 +91,7 @@ export function registerRender(on: On, runtime: Runtime): void {
         usage={usage}
         bridge={bridge}
         lastJump={lastJump}
+        shields={shields}
       />
     )
   })
