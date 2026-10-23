@@ -43,8 +43,9 @@ export type ModuleProps = { readonly ui: UiContext; readonly data: PaneData }
 
 export type ModuleView = { isEmpty(data: PaneData): boolean; draw(props: ModuleProps): RenderNode }
 
-export function drawContext(els: ElementTable): DrawContext {
-  return { els, hasClient: 'Client' in els }
+/** `canAnimate` is false once a client module has failed in this load: the surface then draws without any. */
+export function drawContext(els: ElementTable, canAnimate = true): DrawContext {
+  return { els, hasClient: canAnimate && 'Client' in els }
 }
 
 /** The pane's drawing context from what the surface asked for and the session's readings. */
@@ -56,9 +57,10 @@ export function uiContext(pane: {
   usage: Usage
   view: View
   actions: PaneActions
+  canAnimate: boolean
 }): UiContext {
   return {
-    ...drawContext(pane.els),
+    ...drawContext(pane.els, pane.canAnimate),
     surface: pane.surface,
     now: pane.now,
     width: Math.max(PANE_MIN_WIDTH, pane.bodyColumns),

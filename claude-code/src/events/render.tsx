@@ -1,5 +1,5 @@
 import type { EngineInterface, On } from 'claude-code'
-import { modeOf } from '../domain'
+import { modeOf, WRITERS } from '../domain'
 import {
   getBlackbox,
   getBridge,
@@ -12,9 +12,10 @@ import {
   getTotals,
   getUsage,
   getView,
+  logEntry,
   paneActions,
 } from '../state'
-import { drawContext, Pane, type PaneData, type UiContext, uiContext, Viewscreen } from '../ui'
+import { drawContext, errorText, Pane, type PaneData, PaneFault, type UiContext, uiContext, Viewscreen } from '../ui'
 import { hasBlockDirective, heldNow, type Runtime } from './runtime'
 import { hazardsNow, readBeacon } from './status'
 
@@ -35,7 +36,16 @@ async function paneContext($: EngineInterface, runtime: Runtime, pane: PaneReque
     getTotals($),
     $.clock.now(),
   ])
-  const ui = uiContext({ els: pane.els, surface: pane.surface, bodyColumns: pane.bodyColumns, now, usage, view, actions: paneActions($) })
+  const ui = uiContext({
+    els: pane.els,
+    surface: pane.surface,
+    bodyColumns: pane.bodyColumns,
+    now,
+    usage,
+    view,
+    actions: paneActions($),
+    canAnimate: !runtime.hasClientFault,
+  })
   const data: PaneData = {
     config: runtime.config,
     bridge,
@@ -73,7 +83,7 @@ export function registerRender(on: On, runtime: Runtime): void {
     const [usage, bridge, lastJump] = await Promise.all([getUsage($), getBridge($), getLastJump($)])
     return (
       <Viewscreen
-        draw={drawContext($.ui.resolve(e))}
+        draw={drawContext($.ui.resolve(e), !runtime.hasClientFault)}
         surface={e.surface}
         bodyColumns={e.props.bodyColumns}
         usage={usage}
@@ -83,15 +93,25 @@ export function registerRender(on: On, runtime: Runtime): void {
     )
   })
 
+  // A failed client stops drawing for good, and takes its drawing with it: the next ones leave every client out.
+  on('ui.fault', async ($, e, next) => {
+    if (!runtime.hasClientFault) await logEntry($, WRITERS.comms, `${e.module} stopped (${e.phase}): ${e.reason}`, 'error').catch(() => 0)
+    runtime.hasClientFault = true
+    const heard = await next(e)
+    $.ui.invalidate('ui.render')
+    return heard
+  })
+
   // The engine reads matchers as literals: this is status.ts's PANE_ID.
   on('ui.render', { component: 'Pane', requestId: 'skywatch' }, async ($, e) => {
-    const pane = {
-      surface: e.surface,
-      bodyColumns: e.props.bodyColumns,
-      viewedAgentId: e.props.view?.agentId ?? null,
-      els: $.ui.resolve(e),
+    const els = $.ui.resolve(e)
+    const pane = { surface: e.surface, bodyColumns: e.props.bodyColumns, viewedAgentId: e.props.view?.agentId ?? null, els }
+    // A throw would leave the pane empty for as long as the state that caused it stays.
+    try {
+      const { ui, data } = await paneContext($, runtime, pane)
+      return <Pane ui={ui} data={data} />
+    } catch (error) {
+      return <PaneFault els={els} reason={errorText(error)} />
     }
-    const { ui, data } = await paneContext($, runtime, pane)
-    return <Pane ui={ui} data={data} />
   })
 }

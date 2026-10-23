@@ -85,7 +85,7 @@ export function LiveClock(props: { ui: UiContext; clockKey: string; since: numbe
   const { ui, since, endAt, color } = props
   const { Text } = ui.els
   if (since <= 0) return <Text color={color}>—</Text>
-  if ('Client' in ui.els)
+  if (ui.hasClient && 'Client' in ui.els)
     return <ui.els.Client key={props.clockKey} module="./clients/clock.tsx" props={{ since, now: ui.now, endAt, color }} />
   return <Text color={color}>{fmtTimer((endAt ?? ui.now) - since)}</Text>
 }
@@ -100,7 +100,7 @@ export function Connector(props: {
   spacing?: number
 }): RenderNode {
   const { els } = props.ui
-  if (!('Client' in els)) return <els.Text color={COLORS.faint}>{'─'.repeat(Math.max(1, props.width))}</els.Text>
+  if (!props.ui.hasClient || !('Client' in els)) return <els.Text color={COLORS.faint}>{'─'.repeat(Math.max(1, props.width))}</els.Text>
   const loader = { isActive: props.isActive ?? true, width: props.width, color: props.color, dim: COLORS.faint }
   return (
     <els.Client

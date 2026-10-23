@@ -1,6 +1,6 @@
 export { beaconText } from './beacon'
 export { drawContext, type PaneData, type UiContext, uiContext } from './context'
 export { hazardOf, ringOf } from './hazard'
-export { Pane } from './pane'
+export { errorText, Pane, PaneFault } from './pane'
 export { Viewscreen } from './viewscreen'
 export { gaugeCells } from './widgets'

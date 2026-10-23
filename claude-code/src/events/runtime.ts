@@ -12,6 +12,8 @@ export type Runtime = {
   modeSeen: string | null
   /** Measured risky calls by tool_use_id, until they settle. */
   readonly held: Map<string, Held>
+  /** A client module failed in this load: drawings leave client modules out until a reload. */
+  hasClientFault: boolean
 }
 
 export function createRuntime(config: Config): Runtime {
@@ -21,6 +23,7 @@ export function createRuntime(config: Config): Runtime {
     directives: { directives: [...DEFAULT_DIRECTIVES], errors: [] },
     modeSeen: null,
     held: new Map(),
+    hasClientFault: false,
   }
 }
 

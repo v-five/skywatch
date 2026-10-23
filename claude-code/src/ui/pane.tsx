@@ -1,4 +1,5 @@
-import type { RenderNode } from 'claude-code'
+import type { ElementTable, RenderNode } from 'claude-code'
+import { capitalize, type Module } from '../core'
 import { hasCouncil, isTransmitting } from '../domain'
 import type { ModuleProps } from './context'
 import { hazardOf } from './hazard'
@@ -23,15 +24,43 @@ function Header({ ui, data }: ModuleProps): RenderNode {
   )
 }
 
+const RECALIBRATE_HINT = 'Run /skywatch recalibrate to clear its readings.'
+
+/** One module, or a line saying it failed: a module that throws never takes the rest of the pane with it. */
+function drawModule(module: Module, props: ModuleProps): RenderNode | null {
+  const { Text } = props.ui.els
+  try {
+    const view = MODULE_VIEWS[module]
+    return view.isEmpty(props.data) ? null : view.draw(props)
+  } catch (error) {
+    return <Text color={COLORS.alert}>{`⚠ ${capitalize(module)} could not draw: ${errorText(error)}`}</Text>
+  }
+}
+
+export function errorText(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
 /** The pane: the header, then the configured modules that have something to show, one column. */
 export function Pane(props: ModuleProps): RenderNode {
   const { ui, data } = props
   const { Box } = ui.els
-  const modules = data.config.modules.filter(module => !MODULE_VIEWS[module].isEmpty(data))
+  const drawn = data.config.modules.map(module => drawModule(module, props)).filter((node): node is RenderNode => node !== null)
   return (
     <Box flexDirection="column" width={ui.width}>
       <Header {...props} />
-      <Stack ui={ui} items={modules.map(module => MODULE_VIEWS[module].draw(props))} />
+      <Stack ui={ui} items={drawn} />
+    </Box>
+  )
+}
+
+/** What the pane shows when its readings cannot be drawn at all. */
+export function PaneFault(props: { els: ElementTable; reason: string }): RenderNode {
+  const { Box, Text } = props.els
+  return (
+    <Box flexDirection="column">
+      <Text color={COLORS.alert}>{`⚠ SkyWatch could not draw: ${props.reason}`}</Text>
+      <Text dimColor>{RECALIBRATE_HINT}</Text>
     </Box>
   )
 }
