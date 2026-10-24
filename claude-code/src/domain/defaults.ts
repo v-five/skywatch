@@ -83,6 +83,7 @@ export const DEFAULT_VIEW: View = {
   expanded: null,
   folded: [],
   collapsed: [],
+  writer: null,
   isHangarOpen: false,
   deckOpen: null,
   unfolded: [],

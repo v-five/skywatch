@@ -48,6 +48,11 @@ export function fmtClock(ms: number): string {
   return ms > 0 ? new Date(ms).toTimeString().slice(0, 8) : '--:--:--'
 }
 
+/** A day as the black box heads it: `Fri 24 Oct`, in local time. */
+export function fmtDay(ms: number): string {
+  return new Date(ms).toDateString().slice(0, 10)
+}
+
 export function fmtUsd(usd: number): string {
   return usd >= WHOLE_DOLLARS_FROM ? `$${Math.round(usd)}` : `$${usd.toFixed(2)}`
 }

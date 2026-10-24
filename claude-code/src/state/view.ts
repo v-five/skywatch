@@ -1,5 +1,14 @@
 import type { EngineInterface } from 'claude-code'
-import { type PaneActions, toggleCollapsed, toggleDeck, toggleHangar, toggleShuttle, toggleUnfolded, withEntriesShown } from '../domain'
+import {
+  type PaneActions,
+  toggleCollapsed,
+  toggleDeck,
+  toggleHangar,
+  toggleShuttle,
+  toggleUnfolded,
+  withEntriesShown,
+  withWriter,
+} from '../domain'
 import { patchView } from './atoms'
 
 /** The pane's actions, bound to this session. */
@@ -10,6 +19,7 @@ export function paneActions($: EngineInterface): PaneActions {
     toggleShuttle: (id, isInFlight) => patchView($, view => toggleShuttle(view, id, isInFlight)),
     toggleHangar: () => patchView($, toggleHangar),
     toggleModule: name => patchView($, view => toggleCollapsed(view, name)),
+    filterWriter: writer => patchView($, view => withWriter(view, writer)),
     showEntries: count => patchView($, view => withEntriesShown(view, count)),
   }
 }

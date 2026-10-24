@@ -185,6 +185,8 @@ export type View = {
   folded?: string[]
   /** Modules the person folded to their title row, by name. */
   collapsed?: string[]
+  /** The black box shows one writer's entries; null, everyone's. */
+  writer?: string | null
   /** Whether the hangar shows its docked shuttles. */
   isHangarOpen?: boolean
   deckOpen: Deck | null

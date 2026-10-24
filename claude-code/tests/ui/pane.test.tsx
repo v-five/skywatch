@@ -68,6 +68,24 @@ describe('the pane: decks', () => {
   })
 })
 
+describe('the pane: black box filters and days', () => {
+  test('a writer chip shows only that writer, and a new day gets a heading', async ($, on) => {
+    const clock = world(on)
+    on('turn.start', (_, e) => ({ turnId: e.turnId }))
+    await $.session.start(START)
+    await $.turn.start({ text: 'first prompt', turnId: 'j1' })
+    await clock.advance(24 * 3_600_000)
+    await $.turn.start({ text: 'next day', turnId: 'j2' })
+    const ui = await $.ui.mount(paneRequest())
+    expect(await ui.findAll({ type: 'Text', text: /^── .+ ──$/ })).toHaveLength(2)
+    await ui.press({ key: 'writer-comms' })
+    expect(await ui.find({ type: 'Text', text: 'next day' })).toBeUndefined()
+    await ui.press({ key: 'writer-comms' })
+    expect(await ui.find({ type: 'Text', text: 'next day' })).toBeDefined()
+    await ui.unmount()
+  })
+})
+
 describe('the pane: black box', () => {
   test('a long entry stays unfolded when newer entries arrive', async ($, on) => {
     world(on)

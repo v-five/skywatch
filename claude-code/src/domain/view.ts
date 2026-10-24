@@ -10,6 +10,7 @@ export type PaneActions = {
   toggleShuttle(id: string, isInFlight: boolean): Promise<void>
   toggleHangar(): Promise<void>
   toggleModule(name: string): Promise<void>
+  filterWriter(writer: string | null): Promise<void>
   showEntries(count: number): Promise<void>
 }
 
@@ -37,6 +38,11 @@ export function toggleShuttle(view: View, id: string, isInFlight: boolean): View
 export function toggleCollapsed(view: View, name: string): View {
   const collapsed = view.collapsed ?? []
   return { ...view, collapsed: collapsed.includes(name) ? collapsed.filter(other => other !== name) : [...collapsed, name] }
+}
+
+/** The black box filter; pressing the one in force shows everyone again. */
+export function withWriter(view: View, writer: string | null): View {
+  return { ...view, writer: view.writer === writer ? null : writer }
 }
 
 export function toggleHangar(view: View): View {

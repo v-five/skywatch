@@ -95,3 +95,15 @@ export function entryRows(keyed: readonly KeyedEntry[]): EntryRow[] {
   }
   return rows
 }
+
+/** The black box's writer filters: everyone, or one writer; `shuttles` stands for every shuttle. */
+export const WRITER_FILTERS = ['captain', 'bridge', 'shields', 'comms', 'council', 'shuttles'] as const
+export type WriterFilter = (typeof WRITER_FILTERS)[number]
+const NAMED_WRITERS: ReadonlySet<string> = new Set(Object.values(WRITERS))
+
+/** Whether an entry passes a filter; a shuttle writes under its own title. */
+export function isWrittenBy(entry: BlackboxEntry, filter: WriterFilter | null): boolean {
+  if (filter === null) return true
+  if (filter === 'shuttles') return entry.agentId !== null || entry.who === WRITERS.shuttle || !NAMED_WRITERS.has(entry.who)
+  return entry.who === filter
+}

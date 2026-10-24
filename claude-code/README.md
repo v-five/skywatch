@@ -55,7 +55,7 @@ How full the context window is. The band above the prompt, the header's radar `�
 | `⌁` Relays | the MCP servers the session called: calls, failures and the last error, the failing first. Terminal only by default |
 | `◌` Probes | model loops no shuttle claims, such as workflow agents |
 | `✧` Mission | the whole session: Fuel (tokens, cost and dollars an active hour, calls), Flight time, Power (5-hour and 7-day limits, with when they run out at this pace if that comes before the recharge), the Jump running now and the Last jump, and the jump's Errors |
-| `▣` Black box | what happened, newest first, ten at a time |
+| `▣` Black box | what happened, newest first, ten at a time. Chips at the top show one writer's entries (Captain, Bridge, Shields, Comms, Council, Shuttles); a session that spans days heads each day |
 
 A module's title row shows the loader while its work runs, and ends with a `▲` that folds the module to that row (`▼` opens it again). Long text folds to two lines with a `▼` on its last line to open it.
 

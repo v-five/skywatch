@@ -1,6 +1,6 @@
 import type { RenderNode } from 'claude-code'
-import { capitalize, fmtClock, lineCost, relativePaths } from '../../core'
-import { BLACKBOX_PAGE, type EntryRow, entryRows, keyedEntries } from '../../domain'
+import { capitalize, fmtClock, fmtDay, lineCost, relativePaths } from '../../core'
+import { BLACKBOX_PAGE, type EntryRow, entryRows, isWrittenBy, keyedEntries, WRITER_FILTERS } from '../../domain'
 import type { ModuleProps, ModuleView, UiContext } from '../context'
 import { ModuleFrame } from '../frame'
 import { FOLD_MARK, FRAME_INSET } from '../metrics'
@@ -48,10 +48,42 @@ function Entry({ ui, row }: { ui: UiContext; row: EntryRow }): RenderNode {
   )
 }
 
-/** What happened, newest first: ten entries, ten more at a time. */
+/** One chip per writer; the one in force is drawn at full strength, and pressing it again shows everyone. */
+function WriterFilters({ ui }: { ui: UiContext }): RenderNode {
+  const { Box, Button } = ui.els
+  return (
+    <Box columnGap={2} flexWrap="wrap" marginBottom={1}>
+      {WRITER_FILTERS.map(writer => (
+        <Button
+          key={`writer-${writer}`}
+          plain
+          dimColor={ui.view.writer !== writer}
+          label={capitalize(writer)}
+          onPress={() => ui.actions.filterWriter(writer)}
+        />
+      ))}
+    </Box>
+  )
+}
+
+/** Rows with a day's heading wherever the day changes, when the rows span more than one day. */
+function withDays(ui: UiContext, rows: readonly EntryRow[]): RenderNode[] {
+  const { Text } = ui.els
+  const days = new Set(rows.map(row => fmtDay(row.keyed.entry.at)))
+  return rows.flatMap((row, i) => {
+    const day = fmtDay(row.keyed.entry.at)
+    const previous = rows[i - 1]
+    const isNewDay = days.size > 1 && (!previous || fmtDay(previous.keyed.entry.at) !== day)
+    const entry = <Entry ui={ui} row={row} />
+    return isNewDay ? [<Text color={ui.colors.faint}>{`── ${day} ──`}</Text>, entry] : [entry]
+  })
+}
+
+/** What happened, newest first: ten entries, ten more at a time; one writer's, when filtered. */
 function BlackboxModule({ ui, data }: ModuleProps): RenderNode {
   const { Box, Text, Button } = ui.els
-  const all = keyedEntries(data.blackbox, data.viewedAgentId)
+  const filter = WRITER_FILTERS.find(writer => writer === ui.view.writer) ?? null
+  const all = keyedEntries(data.blackbox, data.viewedAgentId).filter(({ entry }) => isWrittenBy(entry, filter))
   const count = Math.max(BLACKBOX_PAGE, ui.view.entriesShown)
   const shown = all.slice(0, count)
   const hasMore = all.length > count
@@ -64,10 +96,9 @@ function BlackboxModule({ ui, data }: ModuleProps): RenderNode {
       color={ui.colors.dim}
       note={[{ text: `${shown.length} of ${all.length}`, isDim: true }]}
     >
+      <WriterFilters ui={ui} />
       {shown.length === 0 ? <Text color={ui.colors.faint}>nothing yet</Text> : null}
-      {entryRows(shown).map(row => (
-        <Entry ui={ui} row={row} />
-      ))}
+      {withDays(ui, entryRows(shown))}
       {hasMore || hasLess ? (
         <Box justifyContent="center" columnGap={3} marginTop={1}>
           {hasMore ? (
