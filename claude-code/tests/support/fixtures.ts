@@ -36,4 +36,14 @@ export const STORED: { readonly [K in StateKey]: readonly unknown[] } = {
   view: [...JUNK, { expanded: 's1', hazards: 'off' }, { deckOpen: 'nope', hazards: 'loud', unfolded: 'x' }],
   councilRoster: [...JUNK, { councilTypes: 'x' }, { councilTypes: ['architect'] }],
   totals: [...JUNK, { id: 'x', req: 4 }],
+  station: [
+    ...JUNK,
+    { edited: 'x', changes: 'x' },
+    {
+      edited: [{ path: 'a', edits: 2 }, 'junk'],
+      changes: [{ path: 'a', added: 1, removed: 0 }, {}],
+      satellites: [{ id: 's' }],
+      relays: [{}],
+    },
+  ],
 }

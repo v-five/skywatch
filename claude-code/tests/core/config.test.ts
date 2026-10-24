@@ -6,9 +6,8 @@ import { GOLDEN } from '../support/golden'
 test('parseConfig matches the pre-refactor output, its modules applying to every surface', () => {
   const asBefore = (options: (typeof CONFIGS)[number]) => {
     const { modules, palette, ...rest } = parseConfig(options)
-    expect(modules.app).toEqual(modules.terminal)
     expect(palette).toEqual({ app: 'skywatch', terminal: 'skywatch' })
-    // The plan module came after the refactor: by default it sits after the bridge.
+    // Modules added after the refactor are left out: the plan, and the terminal's satellites, cargo and relays.
     return { modules: modules.app.filter(module => module !== 'plan'), ...rest }
   }
   expect(CONFIGS.map(asBefore)).toEqual(GOLDEN.parseConfig)
@@ -24,4 +23,11 @@ test('modules and palette may differ per surface', () => {
 
 test('closed sets', () => {
   expect([isDeck('mcp'), isDeck('nope'), isHazardMode('off'), isHazardMode('loud')]).toEqual([true, false, true, false])
+})
+
+test('by default the terminal adds satellites, cargo and relays, which the app shows itself', () => {
+  const { modules } = parseConfig({})
+  expect(modules.app).not.toContain('cargo')
+  expect(modules.terminal).toContain('cargo')
+  expect(parseConfig({ modules: 'bridge,cargo' }).modules).toEqual({ app: ['bridge', 'cargo'], terminal: ['bridge', 'cargo'] })
 })

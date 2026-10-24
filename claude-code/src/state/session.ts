@@ -4,6 +4,7 @@ import {
   DEFAULT_COUNCIL,
   DEFAULT_JUMP,
   DEFAULT_SHIELDS,
+  DEFAULT_STATION,
   freshTotals,
   normalizeTotals,
   totalsKey,
@@ -20,6 +21,7 @@ import {
   patchProbes,
   patchShields,
   patchShuttles,
+  patchStation,
   patchTotals,
   patchUsage,
   patchView,
@@ -37,6 +39,7 @@ export async function resetAll($: EngineInterface): Promise<void> {
   await patchLastJump($, () => null)
   await patchView($, viewAfterReset)
   await patchUsage($, usageAfterReset)
+  await patchStation($, station => ({ ...DEFAULT_STATION, changes: station.changes }))
 }
 
 /** This session's totals from the store: they outlive a restart, a resume and the day. */

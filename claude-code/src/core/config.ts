@@ -1,7 +1,25 @@
 import type { Deck, HazardMode } from '../../types'
 import { isOneOf } from './guards'
 
-const MODULES = ['bridge', 'plan', 'council', 'shields', 'shuttles', 'probes', 'mission', 'blackbox'] as const
+const MODULES = [
+  'bridge',
+  'plan',
+  'council',
+  'shields',
+  'shuttles',
+  'satellites',
+  'probes',
+  'cargo',
+  'relays',
+  'mission',
+  'blackbox',
+] as const
+/** The desktop app has its own panels for changes, background tasks and connectors: those modules start on the terminal only. */
+const TERMINAL_ONLY: ReadonlySet<string> = new Set(['satellites', 'cargo', 'relays'])
+const DEFAULT_MODULES: PerSurface<Module[]> = {
+  app: MODULES.filter(module => !TERMINAL_ONLY.has(module)),
+  terminal: [...MODULES],
+}
 export type Module = (typeof MODULES)[number]
 
 /** Every deck, in the order a call is matched; `other` takes what no chosen deck matches. */
@@ -34,6 +52,12 @@ export type SurfaceGroup = 'app' | 'terminal'
 export type PerSurface<T> = Readonly<Record<SurfaceGroup, T>>
 const SURFACE_PART = /^\s*(app|terminal)\s*=\s*(.*)$/
 const SURFACE_SEPARATOR = ';'
+
+/** As `perSurface`, with a fallback of its own for each surface. */
+function perSurfaceOr<T>(value: unknown, parse: (part: string) => T | null, fallback: PerSurface<T>): PerSurface<T> {
+  const read = perSurface<T | null>(value, parse, null)
+  return { app: read.app ?? fallback.app, terminal: read.terminal ?? fallback.terminal }
+}
 
 export function surfaceGroupOf(surface: string | null): SurfaceGroup {
   return surface === 'terminal' ? 'terminal' : 'app'
@@ -93,7 +117,7 @@ function paletteNameOf(part: string): PaletteName | null {
 export function parseConfig(options: Readonly<Record<string, unknown>>): Config {
   const decks = listSetting(options, 'decks', DEFAULT_DECKS).filter((part): part is Deck => isDeck(part) && part !== 'other')
   return {
-    modules: perSurface(options.modules, modulesOf, [...MODULES]),
+    modules: perSurfaceOr(options.modules, modulesOf, DEFAULT_MODULES),
     decks: [...new Set(decks), 'other'],
     autoLaunch: typeof options.autoLaunch === 'boolean' ? options.autoLaunch : true,
     hazards: isHazardMode(options.hazards) ? options.hazards : DEFAULT_HAZARDS,

@@ -11,6 +11,7 @@ import type {
   SessionTotals,
   Shields,
   Shuttle,
+  Station,
   Usage,
   View,
 } from '../../types'
@@ -20,6 +21,7 @@ import {
   DEFAULT_COUNCIL_ROSTER,
   DEFAULT_JUMP,
   DEFAULT_SHIELDS,
+  DEFAULT_STATION,
   DEFAULT_TOTALS,
   DEFAULT_USAGE,
   DEFAULT_VIEW,
@@ -34,6 +36,7 @@ import {
   normalizeProbes,
   normalizeShields,
   normalizeShuttles,
+  normalizeStation,
   normalizeTotals,
   normalizeUsage,
   normalizeView,
@@ -54,6 +57,7 @@ const lastJump = atom({ plugin: 'skywatch', key: 'lastJump' } as const, null)
 const view = atom({ plugin: 'skywatch', key: 'view' } as const, DEFAULT_VIEW)
 const councilRoster = atom({ plugin: 'skywatch', key: 'councilRoster' } as const, DEFAULT_COUNCIL_ROSTER)
 const totals = atom({ plugin: 'skywatch', key: 'totals' } as const, DEFAULT_TOTALS)
+const station = atom({ plugin: 'skywatch', key: 'station' } as const, DEFAULT_STATION)
 
 type Change<T> = (value: T) => T
 
@@ -148,4 +152,11 @@ export async function getTotals($: EngineInterface): Promise<SessionTotals> {
 }
 export async function patchTotals($: EngineInterface, change: Change<SessionTotals>): Promise<void> {
   await update($, totals, stored => change(normalizeTotals(stored)))
+}
+
+export async function getStation($: EngineInterface): Promise<Station> {
+  return normalizeStation(await read($, station))
+}
+export async function patchStation($: EngineInterface, change: Change<Station>): Promise<void> {
+  await update($, station, stored => change(normalizeStation(stored)))
 }

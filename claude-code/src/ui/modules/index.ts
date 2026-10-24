@@ -2,10 +2,13 @@ import type { Module } from '../../core'
 import type { ModuleView } from '../context'
 import { BLACKBOX_VIEW } from './blackbox'
 import { BRIDGE_VIEW } from './bridge'
+import { CARGO_VIEW } from './cargo'
 import { COUNCIL_VIEW } from './council'
 import { MISSION_VIEW } from './mission'
 import { PLAN_VIEW } from './plan'
 import { PROBES_VIEW } from './probes'
+import { RELAYS_VIEW } from './relays'
+import { SATELLITES_VIEW } from './satellites'
 import { SHIELDS_VIEW } from './shields'
 import { SHUTTLES_VIEW } from './shuttles'
 
@@ -19,4 +22,7 @@ export const MODULE_VIEWS: Readonly<Record<Module, ModuleView>> = {
   probes: PROBES_VIEW,
   mission: MISSION_VIEW,
   blackbox: BLACKBOX_VIEW,
+  cargo: CARGO_VIEW,
+  satellites: SATELLITES_VIEW,
+  relays: RELAYS_VIEW,
 }

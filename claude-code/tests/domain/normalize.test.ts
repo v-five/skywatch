@@ -10,6 +10,7 @@ import {
   DEFAULT_PROBE,
   DEFAULT_SHIELDS,
   DEFAULT_SHUTTLE,
+  DEFAULT_STATION,
   DEFAULT_TOTALS,
   DEFAULT_USAGE,
   DEFAULT_VIEW,
@@ -23,6 +24,7 @@ import {
   normalizeProbes,
   normalizeShields,
   normalizeShuttles,
+  normalizeStation,
   normalizeTotals,
   normalizeUsage,
   normalizeView,
@@ -50,6 +52,7 @@ const SHAPES: { readonly [K in StateKey]: { read: (stored: unknown) => unknown; 
   view: { read: normalizeView, keys: keysOf(DEFAULT_VIEW), shape: DEFAULT_VIEW },
   councilRoster: { read: normalizeCouncilRoster, keys: keysOf(DEFAULT_COUNCIL_ROSTER) },
   totals: { read: normalizeTotals, keys: keysOf(DEFAULT_TOTALS), shape: DEFAULT_TOTALS },
+  station: { read: normalizeStation, keys: keysOf(DEFAULT_STATION) },
 }
 
 /** Fields missing from a read value, or of another type than their non-null default. */

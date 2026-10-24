@@ -1,7 +1,7 @@
 import type { EngineInterface, On } from 'claude-code'
 import { usageFrom, withCommand } from '../domain'
 import { homeFolder, loadDirectives } from '../forcefield'
-import { loadTotals, migrateState, patchBridge, patchUsage, readUsage, recordManifest, recordUsage, resetAll } from '../state'
+import { loadTotals, lookAtCargo, migrateState, patchBridge, patchUsage, readUsage, recordManifest, recordUsage, resetAll } from '../state'
 import { loadPaletteFiles } from './palette'
 import type { Runtime } from './runtime'
 import { openPane, refreshStatus, remeasure } from './status'
@@ -22,6 +22,7 @@ async function startSession($: EngineInterface, runtime: Runtime): Promise<void>
   const reading = await readUsage($)
   if (reading) await patchUsage($, usage => usageFrom(usage, reading))
   await recordManifest($).catch(() => undefined)
+  await lookAtCargo($).catch(() => undefined)
   await loadTotals($).catch(() => undefined)
   if (runtime.config.autoLaunch) void openPane($).catch(() => undefined)
   await refreshStatus($, runtime)

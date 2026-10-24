@@ -1,5 +1,18 @@
 import type { ElementTable, RenderNode, RenderSurface } from 'claude-code'
-import type { BlackboxEntry, Bridge, Council, Jump, LastJump, Probe, SessionTotals, Shields, Shuttle, Usage, View } from '../../types'
+import type {
+  BlackboxEntry,
+  Bridge,
+  Council,
+  Jump,
+  LastJump,
+  Probe,
+  SessionTotals,
+  Shields,
+  Shuttle,
+  Station,
+  Usage,
+  View,
+} from '../../types'
 import type { Config, Places } from '../core'
 import type { PaneActions } from '../domain'
 import type { ActiveHold } from '../forcefield'
@@ -41,6 +54,7 @@ export type PaneData = {
   readonly jump: Jump
   readonly lastJump: LastJump | null
   readonly totals: SessionTotals
+  readonly station: Station
   readonly held: ActiveHold | null
   readonly hasBlockDirective: boolean
   readonly viewedAgentId: string | null

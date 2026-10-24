@@ -9,6 +9,7 @@ import {
   getProbes,
   getShields,
   getShuttles,
+  getStation,
   getTotals,
   getUsage,
   getView,
@@ -22,7 +23,7 @@ import { hazardsNow, readBeacon } from './status'
 type PaneRequest = { surface: UiContext['surface']; bodyColumns: number; viewedAgentId: string | null; els: UiContext['els'] }
 
 async function paneContext($: EngineInterface, runtime: Runtime, pane: PaneRequest): Promise<{ ui: UiContext; data: PaneData }> {
-  const [bridge, usage, council, shields, fleet, probes, blackbox, jump, lastJump, view, totals, now] = await Promise.all([
+  const [bridge, usage, council, shields, fleet, probes, blackbox, jump, lastJump, view, totals, station, now] = await Promise.all([
     getBridge($),
     getUsage($),
     getCouncil($),
@@ -34,6 +35,7 @@ async function paneContext($: EngineInterface, runtime: Runtime, pane: PaneReque
     getLastJump($),
     getView($),
     getTotals($),
+    getStation($),
     $.clock.now(),
   ])
   const ui = uiContext({
@@ -60,6 +62,7 @@ async function paneContext($: EngineInterface, runtime: Runtime, pane: PaneReque
     jump,
     lastJump,
     totals,
+    station,
     held: heldNow(runtime),
     hasBlockDirective: hasBlockDirective(runtime),
     viewedAgentId: pane.viewedAgentId,

@@ -50,6 +50,9 @@ How full the context window is. The band above the prompt, the header's radar `�
 | `⚠` Distress | not a module of its own: when the session looks stuck (three errors in a row, one file edited six times in a jump, a permission prompt waiting two minutes) the Bridge shows a Distress row, the beacon says why, the band's loader turns red, and the black box logs it once from Comms |
 | `⊹` Flight plan | the bridge's task list: each step done, in progress, pending or skipped (dropped before it was done), with progress in the title. Steps that share a name before `:` (`Fix findings: force field`, `Fix findings: domain`) form a phase; a finished phase folds to one line |
 | `⇡` a shuttle | one card per subagent, titled from its mission ("Implement the footer component" reads `Footer builder`): its Mission, its Brief (the prompt it was given), Helm (effort, type, model), Fuel with its share of the session's tokens and its flight time, Scanning or its Debrief once docked (markdown read as prose), why it was Lost when it did not dock, and its last tool. A card in flight is open until you fold it; docked shuttles land in the Hangar, one line that opens to their folded cards |
+| `◍` Satellites | background tasks (a shell left running): those in orbit with their clocks, then the last that came down. Terminal only by default, as the desktop app lists them itself |
+| `▤` Cargo hold | the files this session edited, and the repository's uncommitted changes by folder (`git diff --numstat HEAD`, looked at when each jump ends). Terminal only by default |
+| `⌁` Relays | the MCP servers the session called: calls, failures and the last error, the failing first. Terminal only by default |
 | `◌` Probes | model loops no shuttle claims, such as workflow agents |
 | `✧` Mission | the whole session: Fuel (tokens, cost and dollars an active hour, calls), Flight time, Power (5-hour and 7-day limits, with when they run out at this pace if that comes before the recharge), the Jump running now and the Last jump, and the jump's Errors |
 | `▣` Black box | what happened, newest first, ten at a time |
@@ -110,7 +113,7 @@ In `/config`, or under `pluginConfigs["skywatch@v-five"].options` in `settings.j
 | --- | --- | --- |
 | `hazards` | `beacon` | `viewscreen`, `beacon` or `off` |
 | `autoLaunch` | `true` | launch the pane when a session starts |
-| `modules` | `bridge,plan,council,shields,shuttles,probes,mission,blackbox` | the modules, in order; leave one out to hide it. `app=bridge,mission; terminal=bridge,shields` gives each surface its own |
+| `modules` | empty: every module in the terminal; in the app all but satellites, cargo and relays | the modules, in order; leave one out to hide it. `app=bridge,mission; terminal=bridge,shields` gives each surface its own |
 | `palette` | `skywatch` | the colours; `app=…; terminal=…` gives each surface its own (see [Palettes](#palettes)) |
 | `decks` | `file,shell,other` | Shields decks, from `file`, `git`, `shell`, `web`, `agents`, `app` and `mcp`; `other` takes the rest |
 

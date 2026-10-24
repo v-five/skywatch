@@ -17,6 +17,7 @@ import {
   statusOf,
   stepProbe,
   stepSpeed,
+  taskNotificationOf,
   withActiveTime,
   withHistory,
   withPromptAt,
@@ -35,7 +36,9 @@ import {
   getJump,
   getShuttles,
   logEntry,
+  lookAtCargo,
   noteAdvice,
+  noteLanding,
   noteMode,
   patchBridge,
   patchJump,
@@ -67,6 +70,8 @@ async function startBridgeJump($: EngineInterface, runtime: Runtime, text: strin
     if (advice && advice !== council.lastAdvice) await noteAdvice($, advice)
     return
   }
+  const landed = taskNotificationOf(text)
+  if (landed) await noteLanding($, landed.id, landed.status)
   const opening = promptLine(text)
   const promptAt = await logEntry($, opening.who, opening.text)
   await patchJump($, jump => withPromptAt(jump, promptAt))
@@ -110,6 +115,7 @@ async function completeBridgeJump($: EngineInterface, runtime: Runtime, e: Args<
   if (context > 0) await patchUsage($, usage => withHistory(usage, context))
   await patchTotals($, totals => withActiveTime(totals, e.durationMs))
   await saveTotals($)
+  await lookAtCargo($).catch(() => undefined)
   await refreshStatus($, runtime)
 }
 

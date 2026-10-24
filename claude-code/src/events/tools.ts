@@ -36,6 +36,7 @@ import {
   whoIs,
 } from '../state'
 import type { Runtime } from './runtime'
+import { recordStation } from './station'
 import { refreshStatus } from './status'
 
 const CHECK_DETAIL_MAX = 90
@@ -154,6 +155,7 @@ async function afterToolCall($: EngineInterface, runtime: Runtime, e: Args<'tool
   const isSettled = await settleAsk($, e.tool_use_id, didRun)
   if (isHandback) await noteHandback($, e)
   else if (e.tool !== 'Agent') await recordOutcome($, runtime, e, ran, didRun)
+  await recordStation($, runtime, e, { ran, didRun })
   if (!isHandback && (isSettled || (!didRun && e.tool !== 'Agent'))) await refreshStatus($, runtime)
   await noteDistress($, runtime)
 }

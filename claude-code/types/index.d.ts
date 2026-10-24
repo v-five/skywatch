@@ -67,6 +67,31 @@ export type Usage = {
   used?: string[]
 }
 
+/** A file the repository has changed and not committed: lines added and removed. */
+export type CargoFile = { path: string; added: number; removed: number }
+
+/** A background task: a shell left running, until its notification or a stop. */
+export type Satellite = {
+  id: string
+  label: string
+  startedAt: number
+  endedAt: number | null
+  status: 'running' | 'done' | 'failed' | 'stopped'
+}
+
+/** An MCP server, by the calls the session made to it. */
+export type Relay = { server: string; calls: number; errors: number; lastError: string }
+
+/** The starbase's systems around the bridge: what it carries, what orbits, and which relays answer. */
+export type Station = {
+  /** Files edited this session, by path, most recent last. */
+  edited: { path: string; edits: number }[]
+  /** Uncommitted changes, from the last look at the repository; null outside a repository or before a look. */
+  changes: CargoFile[] | null
+  satellites: Satellite[]
+  relays: Relay[]
+}
+
 /** One part of the context: its name, its tokens, its kind and the theme colour Claude Code draws it in. */
 export type Layer = { name: string; tokens: number; kind: 'used' | 'free' | 'buffer'; color: string }
 
@@ -188,6 +213,7 @@ declare module 'claude-code' {
       view: View
       councilRoster: CouncilRoster
       totals: SessionTotals
+      station: Station
     }
   }
 }
