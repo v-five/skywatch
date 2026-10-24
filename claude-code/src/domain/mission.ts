@@ -26,9 +26,12 @@ export function startJump(startedAt: number, costAtStart: number | null): Jump {
 }
 
 /** Errors count on the bridge only; edits count from every shuttle, so delegated work still reaches "before done". */
-export function afterCall(jump: Jump, call: { inSubagent: boolean; hasFailed: boolean; isEdit: boolean }): Jump {
+export function afterCall(jump: Jump, call: { inSubagent: boolean; hasFailed: boolean; isEdit: boolean; file?: string }): Jump {
+  const editsByFile = jump.editsByFile ?? {}
+  const { file } = call
   return {
     ...jump,
+    ...(call.isEdit && file ? { editsByFile: { ...editsByFile, [file]: (editsByFile[file] ?? 0) + 1 } } : {}),
     errorStreak: call.inSubagent ? jump.errorStreak : call.hasFailed ? jump.errorStreak + 1 : 0,
     errors: jump.errors + (!call.inSubagent && call.hasFailed ? 1 : 0),
     edits: jump.edits + (call.isEdit ? 1 : 0),

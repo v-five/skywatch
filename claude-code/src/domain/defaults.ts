@@ -74,6 +74,7 @@ export const DEFAULT_JUMP: Jump = {
   tokIn: 0,
   tokOut: 0,
   promptAt: null,
+  editsByFile: {},
 }
 
 export const DEFAULT_TOTALS: SessionTotals = { id: '', firstSeen: 0, activeMs: 0, tokIn: 0, tokOut: 0, req: 0 }

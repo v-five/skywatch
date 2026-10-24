@@ -37,6 +37,19 @@ describe('tool calls', () => {
     await ui.unmount()
   })
 
+  test('three errors in a row raise a distress on the bridge and in the black box, once', async ($, on) => {
+    world(on)
+    runTools(on, isFalse)
+    on('turn.start', (_, e) => ({ turnId: e.turnId }))
+    await $.session.start(START)
+    await $.turn.start({ text: 'go', turnId: 'j1' })
+    for (const n of ['one', 'two', 'three', 'four']) await $.tool.call({ tool: 'Bash', command: `false ${n}` })
+    const ui = await $.ui.mount(paneRequest())
+    expect(await ui.find({ type: 'Text', text: '⚠ 4 errors in a row' })).toBeDefined()
+    expect(await ui.findAll({ type: 'Text', text: /^distress · / })).toHaveLength(1)
+    await ui.unmount()
+  })
+
   test('a shuttle keeps its last tools; the card shows the one before the latest', async ($, on) => {
     world(on)
     runTools(on)

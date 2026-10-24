@@ -1,6 +1,6 @@
 import type { RenderNode } from 'claude-code'
 import { fmtSpeed, kTokens, prettyModel, printable } from '../../core'
-import { avgSpeed, isEffort } from '../../domain'
+import { avgSpeed, distressOf, isEffort } from '../../domain'
 import type { ModuleProps, ModuleView } from '../context'
 import { ModuleFrame } from '../frame'
 import { Row, Ruler, Sep } from '../layout'
@@ -84,6 +84,18 @@ function Scanning({ ui, data }: ModuleProps): RenderNode | null {
   )
 }
 
+/** A sign the session is stuck: errors in a row, one file edited over and over, a prompt left waiting. */
+function Distress({ ui, data }: ModuleProps): RenderNode | null {
+  const { Text } = ui.els
+  const distress = distressOf({ jump: data.jump, shields: data.shields, now: ui.now })
+  if (!distress) return null
+  return (
+    <Row ui={ui} label="Distress">
+      <Text color={ui.colors.alert} bold>{`⚠ ${distress}`}</Text>
+    </Row>
+  )
+}
+
 function Fleet({ ui, data }: ModuleProps): RenderNode | null {
   const { Box, Text } = ui.els
   if (data.fleet.length === 0) return null
@@ -125,6 +137,7 @@ function BridgeModule(props: ModuleProps): RenderNode {
       <Manifest {...props} />
       <Ballast {...props} />
       <Warp {...props} />
+      <Distress {...props} />
       <Scanning {...props} />
       <Fleet {...props} />
     </ModuleFrame>

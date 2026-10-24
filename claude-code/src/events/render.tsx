@@ -1,5 +1,5 @@
 import type { EngineInterface, On } from 'claude-code'
-import { modeOf, WRITERS } from '../domain'
+import { distressOf, modeOf, WRITERS } from '../domain'
 import {
   getBlackbox,
   getBridge,
@@ -82,7 +82,14 @@ export function registerRender(on: On, runtime: Runtime): void {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if ((await hazardsNow($, runtime)) !== 'viewscreen' || e.props.hasSurvey) return next(e)
-    const [usage, bridge, lastJump, shields] = await Promise.all([getUsage($), getBridge($), getLastJump($), getShields($)])
+    const [usage, bridge, lastJump, shields, jump, now] = await Promise.all([
+      getUsage($),
+      getBridge($),
+      getLastJump($),
+      getShields($),
+      getJump($),
+      $.clock.now(),
+    ])
     return (
       <Viewscreen
         draw={drawContext($.ui.resolve(e), paletteFor(runtime, e.surface), !runtime.hasClientFault)}
@@ -92,6 +99,7 @@ export function registerRender(on: On, runtime: Runtime): void {
         bridge={bridge}
         lastJump={lastJump}
         shields={shields}
+        distress={distressOf({ jump, shields, now })}
       />
     )
   })

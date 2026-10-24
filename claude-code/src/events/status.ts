@@ -1,7 +1,7 @@
 import type { EngineInterface, UiOpenResult } from 'claude-code'
 import type { HazardMode } from '../../types'
-import { effectiveHazards } from '../domain'
-import { getCouncil, getShields, getShuttles, getUsage, getView, readUsage, recordManifest, recordUsage } from '../state'
+import { distressOf, effectiveHazards } from '../domain'
+import { getCouncil, getJump, getShields, getShuttles, getUsage, getView, readUsage, recordManifest, recordUsage } from '../state'
 import { beaconText } from '../ui'
 import type { Runtime } from './runtime'
 
@@ -20,8 +20,15 @@ export async function hazardsNow($: EngineInterface, runtime: Runtime): Promise<
 }
 
 export async function readBeacon($: EngineInterface): Promise<string> {
-  const [usage, council, shields, fleet] = await Promise.all([getUsage($), getCouncil($), getShields($), getShuttles($)])
-  return beaconText({ usage, council, shields, fleet })
+  const [usage, council, shields, fleet, jump, now] = await Promise.all([
+    getUsage($),
+    getCouncil($),
+    getShields($),
+    getShuttles($),
+    getJump($),
+    $.clock.now(),
+  ])
+  return beaconText({ usage, council, shields, fleet, distress: distressOf({ jump, shields, now }) })
 }
 
 /** The beacon is a status entry, except on the terminal, which marks those as warnings: there it joins the hint line. */

@@ -6,7 +6,13 @@ import { hazardOf, ringOf } from './hazard'
 export const AIRLOCK_MARK = '⚠'
 
 /** The beacon's words: the hazard and the context ring, then shuttles, transmissions and stops. */
-export function beaconText(data: { usage: Usage; council: Council; shields: Shields; fleet: readonly Shuttle[] }): string {
+export function beaconText(data: {
+  usage: Usage
+  council: Council
+  shields: Shields
+  fleet: readonly Shuttle[]
+  distress?: string | null
+}): string {
   const { usage, council, fleet } = data
   const pct = Math.round(usage.pct ?? 0)
   const hazard = hazardOf(pct)
@@ -15,7 +21,8 @@ export function beaconText(data: { usage: Usage; council: Council; shields: Shie
   const stopped = summary.deny + summary.refused
   return [
     `${hazard.icon} ${hazard.word} · ${ringOf(pct)} ${pct}%`,
-    summary.ask > 0 ? `${AIRLOCK_MARK} airlock ${summary.ask} waiting` : null,
+    data.distress ? `${AIRLOCK_MARK} ${data.distress}` : null,
+    summary.ask > 0 && !data.distress ? `${AIRLOCK_MARK} airlock ${summary.ask} waiting` : null,
     fleet.length > 0 ? `shuttles ${running}/${fleet.length}` : null,
     hasCouncil(council) ? `council ${isTransmitting(council) ? 'transmitting' : council.transmissions.length}` : null,
     stopped > 0 ? `stopped ${stopped}` : null,

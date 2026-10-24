@@ -147,6 +147,8 @@ export type Jump = {
   tokOut: number
   /** The `at` of the black box entry that opened the jump. */
   promptAt: number | null
+  /** Edits this jump, by file. */
+  editsByFile?: Record<string, number>
 }
 
 export type LastJump = { durationMs: number; shuttles: number; edits: number; errors: number; costDelta: number | null; reason: string }

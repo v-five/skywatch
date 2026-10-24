@@ -198,7 +198,9 @@ export function normalizeBlackbox(stored: unknown): BlackboxEntry[] {
 }
 
 export function normalizeJump(stored: unknown): Jump {
-  return mergeDefaults(DEFAULT_JUMP, stored, { costAtStart: isNumber, promptAt: isNumber })
+  const jump = mergeDefaults(DEFAULT_JUMP, stored, { costAtStart: isNumber, promptAt: isNumber })
+  const edits = isRecord(jump.editsByFile) ? jump.editsByFile : {}
+  return { ...jump, editsByFile: Object.fromEntries(Object.entries(edits).filter(([, count]) => isNumber(count))) }
 }
 
 export function normalizeLastJump(stored: unknown): LastJump | null {

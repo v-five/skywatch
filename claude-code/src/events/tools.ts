@@ -1,6 +1,6 @@
 import type { Args, EngineInterface, On, ResultOf } from 'claude-code'
 import type { Check } from '../../types'
-import { fmtDuration, shorten } from '../core'
+import { fmtDuration, shorten, shortPath } from '../core'
 import {
   adviceLine,
   afterCall,
@@ -9,6 +9,7 @@ import {
   countHeld,
   deckOf,
   describeInput,
+  distressOf,
   EDIT_TOOLS,
   HANDBACK_TOOL,
   handbackMessage,
@@ -130,7 +131,8 @@ async function recordOutcome($: EngineInterface, runtime: Runtime, e: Args<'tool
   const isEdit = !hasFailed && didRun && EDIT_TOOLS.has(e.tool)
   const isStopped = ran.deny !== undefined
   if (isEdit || hasFailed || (!e.agentId && (await getJump($)).errorStreak > 0)) {
-    await patchJump($, jump => afterCall(jump, { inSubagent: Boolean(e.agentId), hasFailed, isEdit }))
+    const file = 'file_path' in e && typeof e.file_path === 'string' ? shortPath(e.file_path, runtime.places) : undefined
+    await patchJump($, jump => afterCall(jump, { inSubagent: Boolean(e.agentId), hasFailed, isEdit, ...(file ? { file } : {}) }))
   }
   const text = shorten(describeInput(e.tool, e, runtime.places), CALL_TEXT_MAX)
   const { agentId } = e
@@ -153,6 +155,19 @@ async function afterToolCall($: EngineInterface, runtime: Runtime, e: Args<'tool
   if (isHandback) await noteHandback($, e)
   else if (e.tool !== 'Agent') await recordOutcome($, runtime, e, ran, didRun)
   if (!isHandback && (isSettled || (!didRun && e.tool !== 'Agent'))) await refreshStatus($, runtime)
+  await noteDistress($, runtime)
+}
+
+/** A new sign the session is stuck goes to the black box once, from comms. */
+async function noteDistress($: EngineInterface, runtime: Runtime): Promise<void> {
+  const [jump, shields, now] = await Promise.all([getJump($), getShields($), $.clock.now()])
+  const distress = distressOf({ jump, shields, now })
+  // One entry per kind of trouble: a count or a wait that grows is the same distress.
+  const kind = distress?.replace(/\d[\dms]*/g, '#') ?? null
+  if (kind === runtime.lastDistress) return
+  runtime.lastDistress = kind
+  if (distress) await logEntry($, WRITERS.comms, `distress · ${distress}`, 'error')
+  await refreshStatus($, runtime)
 }
 
 export function registerTools(on: On, runtime: Runtime): void {

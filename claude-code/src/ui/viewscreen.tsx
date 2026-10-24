@@ -19,6 +19,7 @@ type ViewscreenProps = {
   bridge: Bridge
   lastJump: LastJump | null
   shields: Shields
+  distress: string | null
 }
 
 function lastJumpParts(usage: Usage, bridge: Bridge, lastJump: LastJump | null): string[] {
@@ -31,13 +32,14 @@ function lastJumpParts(usage: Usage, bridge: Bridge, lastJump: LastJump | null):
 }
 
 /** The band above the prompt: the hazard, how full the context is, and the last jump; a loader while working. */
-export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump, shields }: ViewscreenProps): RenderNode {
+export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump, shields, distress }: ViewscreenProps): RenderNode {
   const { Box, Text } = draw.els
   const pct = Math.round(usage.pct ?? 0)
   const hazard = hazardOf(pct, draw.space)
   const last = lastJumpParts(usage, bridge, lastJump)
-  // A prompt waiting for an answer turns the loader to the waiting colour; words would change the band's height.
+  // A stuck session turns the loader red, a waiting prompt yellow; words would change the band's height.
   const isWaiting = shieldsSummary(shields).ask > 0
+  const loaderColor = distress ? draw.colors.alert : isWaiting ? draw.colors.waiting : hazard.color
   return (
     // In the terminal the band sits right under the transcript, so it keeps a row of space above.
     <Box flexDirection="row" justifyContent="space-between" paddingX={1} marginTop={surface === 'terminal' ? 1 : 0}>
@@ -54,8 +56,8 @@ export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump
           ui={draw}
           connectorKey="band-loader"
           width={LOADER_WIDTH}
-          color={isWaiting ? draw.colors.waiting : hazard.color}
-          isActive={isWaiting || bridge.isRunning || Boolean(bridge.command)}
+          color={loaderColor}
+          isActive={Boolean(distress) || isWaiting || bridge.isRunning || Boolean(bridge.command)}
           spacing={LOADER_SPACING}
         />
       ) : null}

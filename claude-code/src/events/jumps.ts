@@ -56,6 +56,7 @@ async function startBridgeJump($: EngineInterface, runtime: Runtime, text: strin
   if (runtime.modeSeen) await noteMode($, runtime.modeSeen)
   const [now, cost] = await Promise.all([$.clock.now(), costNow($)])
   await patchJump($, () => startJump(now, cost))
+  runtime.lastDistress = null
   await patchBridge($, startRunning)
   if (!text) return
   // The hand-back tool call normally carries a background architect's report first; this is the fallback.

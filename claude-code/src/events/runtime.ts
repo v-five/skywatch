@@ -18,6 +18,8 @@ export type Runtime = {
   places: Places
   /** The palette files' colours and unread lines, read when the session starts. */
   paletteFiles: PaletteFiles
+  /** The kind of the last sign of a stuck session logged, so each kind is logged once. */
+  lastDistress: string | null
   /** A client module failed in this load: drawings leave client modules out until a reload. */
   hasClientFault: boolean
 }
@@ -31,6 +33,7 @@ export function createRuntime(config: Config): Runtime {
     held: new Map(),
     places: NO_PLACES,
     paletteFiles: { overrides: {}, errors: [] },
+    lastDistress: null,
     hasClientFault: false,
   }
 }
