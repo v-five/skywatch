@@ -18,6 +18,7 @@ import {
   stepProbe,
   stepSpeed,
   taskNotificationOf,
+  WRITERS,
   withActiveTime,
   withHistory,
   withPromptAt,
@@ -35,6 +36,7 @@ import {
   getCouncil,
   getJump,
   getShuttles,
+  getUsage,
   logEntry,
   lookAtCargo,
   noteAdvice,
@@ -117,6 +119,21 @@ async function completeBridgeJump($: EngineInterface, runtime: Runtime, e: Args<
   await saveTotals($)
   await lookAtCargo($).catch(() => undefined)
   await refreshStatus($, runtime)
+  await compactByDirective($, runtime)
+}
+
+/** A `compact at …` directive compacts between turns once the context reaches its point; once, until it drops. */
+async function compactByDirective($: EngineInterface, runtime: Runtime): Promise<void> {
+  const point = runtime.directives.compact
+  const { pct } = await getUsage($)
+  if (!point || pct === null || pct < point.pct || runtime.isCompacting) return
+  runtime.isCompacting = true
+  try {
+    await logEntry($, WRITERS.comms, `compacting at ${Math.round(pct)}% · directive compact at ${point.target}`)
+    await $.session.compact().catch(() => undefined)
+  } finally {
+    runtime.isCompacting = false
+  }
 }
 
 async function completeShuttle($: EngineInterface, e: Args<'turn.complete'>, shuttle: Shuttle, now: number): Promise<void> {

@@ -1,4 +1,4 @@
-import { isOneOf } from '../core'
+import { HAZARD_STARTS, hazardStart, isOneOf } from '../core'
 import { RISK_GROUPS, type RiskGroup } from './risk'
 import { segmentsOf } from './shell'
 
@@ -9,8 +9,11 @@ export type DirectiveMode = (typeof DIRECTIVE_MODES)[number]
 /** `target` is a group (`@delete`) or a command as typed, with `*` for anything. */
 export type Directive = { mode: DirectiveMode; target: string; source: string }
 
-/** The directives in force, and the lines that did not read. */
-export type DirectiveSet = { directives: Directive[]; errors: string[] }
+/** `compact at <step or N%>`: compact between turns once the context reaches it. */
+export type CompactDirective = { pct: number; target: string; source: string }
+
+/** The directives in force, the compaction point if one is set, and the lines that did not read. */
+export type DirectiveSet = { directives: Directive[]; errors: string[]; compact?: CompactDirective | null }
 
 export const DIRECTIVES_FILE = '.claude/skywatch.directives'
 
@@ -21,6 +24,15 @@ export const DEFAULT_DIRECTIVES: readonly Directive[] = [
 ]
 
 const DIRECTIVE_LINE = /^(pass|hold|block)\s+(.+)$/i
+const COMPACT_LINE = /^compact\s+at\s+(\S+)$/i
+const PERCENT = /^(\d{1,2})%$/
+
+/** `ion-storm` or `85%` as a percent of the window; null for anything else. */
+function compactPct(target: string): number | null {
+  const percent = PERCENT.exec(target)?.[1]
+  if (percent) return Number(percent)
+  return HAZARD_STARTS.has(target) ? hazardStart(target) : null
+}
 const MODE_WIDTH = Math.max(...DIRECTIVE_MODES.map(mode => mode.length))
 const TARGET_WIDTH = 28
 
@@ -37,6 +49,12 @@ export function parseDirectives(text: string, source: string): DirectiveSet {
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/(^|\s)#.*$/, '').trim()
     if (!line) return
+    const compact = COMPACT_LINE.exec(line)?.[1]?.toLowerCase()
+    const pct = compact ? compactPct(compact) : null
+    if (compact && pct !== null) {
+      set.compact = { pct, target: compact, source }
+      return
+    }
     const match = DIRECTIVE_LINE.exec(line)
     const mode = match?.[1]?.toLowerCase()
     const target = match?.[2]?.trim() ?? ''
@@ -75,7 +93,12 @@ export function directiveLine(directive: Directive): string {
 /** The text `/skywatch directives` answers with. */
 export function directivesReport(set: DirectiveSet): string {
   const lines = set.directives.map(d => `${d.mode.padEnd(MODE_WIDTH)}  ${d.target.padEnd(TARGET_WIDTH)}  ${d.source}`)
+  const compact = set.compact
+    ? [`${'compact'.padEnd(MODE_WIDTH)}  ${`at ${set.compact.target}`.padEnd(TARGET_WIDTH)}  ${set.compact.source}`]
+    : []
   const unread =
-    set.errors.length > 0 ? `\n\nNot read (each line is \`pass|hold|block <@group or command>\`):\n${set.errors.join('\n')}` : ''
-  return `Directives, the last match wins (~/${DIRECTIVES_FILE}, then ${DIRECTIVES_FILE}):\n${lines.join('\n')}${unread}`
+    set.errors.length > 0
+      ? `\n\nNot read (each line is \`pass|hold|block <@group or command>\` or \`compact at <step or N%>\`):\n${set.errors.join('\n')}`
+      : ''
+  return `Directives, the last match wins (~/${DIRECTIVES_FILE}, then ${DIRECTIVES_FILE}):\n${[...lines, ...compact].join('\n')}${unread}`
 }

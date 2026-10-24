@@ -1,3 +1,4 @@
+import { hazardStart } from '../core'
 import { DEFAULT_PALETTE, type Space, type SpaceStep } from './palette'
 
 export type Hazard = { upTo: number; icon: string; word: string; color: string }
@@ -8,13 +9,13 @@ const EVENT_HORIZON: Step = { upTo: Number.POSITIVE_INFINITY, icon: '◉', word:
 
 /** Hazard steps by percent of the context window used: single-width symbols. */
 const HAZARD_SCALE: readonly Step[] = [
-  { upTo: 10, icon: '✦', word: 'Clear space', step: 'clearSpace' },
-  { upTo: 25, icon: '∙', word: 'Stardust', step: 'stardust' },
-  { upTo: 40, icon: '≈', word: 'Nebula', step: 'nebula' },
-  { upTo: 55, icon: '☁', word: 'Gas cloud', step: 'gasCloud' },
-  { upTo: 70, icon: '∴', word: 'Debris', step: 'debris' },
-  { upTo: 80, icon: '☄', word: 'Asteroid field', step: 'asteroids' },
-  { upTo: 90, icon: 'ϟ', word: 'Ion storm', step: 'ionStorm' },
+  { upTo: hazardStart('stardust'), icon: '✦', word: 'Clear space', step: 'clearSpace' },
+  { upTo: hazardStart('nebula'), icon: '∙', word: 'Stardust', step: 'stardust' },
+  { upTo: hazardStart('gas-cloud'), icon: '≈', word: 'Nebula', step: 'nebula' },
+  { upTo: hazardStart('debris'), icon: '☁', word: 'Gas cloud', step: 'gasCloud' },
+  { upTo: hazardStart('asteroids'), icon: '∴', word: 'Debris', step: 'debris' },
+  { upTo: hazardStart('ion-storm'), icon: '☄', word: 'Asteroid field', step: 'asteroids' },
+  { upTo: hazardStart('event-horizon'), icon: 'ϟ', word: 'Ion storm', step: 'ionStorm' },
   EVENT_HORIZON,
 ]
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'claude-code/testing'
-import { paneRequest, START, skywatch, slashCommand } from '../support/drive'
+import { complete, paneRequest, START, skywatch, slashCommand } from '../support/drive'
 import { HOME, PROJECT_DIRECTIVES, world } from '../support/world'
 
 const DIRECTIVES_REPORT = [
@@ -12,8 +12,9 @@ const DIRECTIVES_REPORT = [
   'hold   @database                     default',
   'block  git push origin main          ~/.claude/skywatch.directives',
   'hold   @delete                       .claude/skywatch.directives',
+  'compact  at ion-storm                  .claude/skywatch.directives',
   '',
-  'Not read (each line is `pass|hold|block <@group or command>`):',
+  'Not read (each line is `pass|hold|block <@group or command>` or `compact at <step or N%>`):',
   '.claude/skywatch.directives:2  nonsense',
 ].join('\n')
 
@@ -50,7 +51,7 @@ describe('/skywatch', () => {
     world(on, {
       files: {
         [`${HOME}/.claude/skywatch.directives`]: 'block git push origin main\n',
-        [PROJECT_DIRECTIVES]: 'hold @delete\nnonsense\n',
+        [PROJECT_DIRECTIVES]: 'hold @delete\nnonsense\ncompact at ion-storm\n',
       },
     })
     await $.session.start(START)
@@ -101,5 +102,23 @@ describe('other slash commands', () => {
     const pane = await $.ui.mount(paneRequest())
     expect(await pane.find({ type: 'Text', text: '  12%' })).toBeDefined()
     await pane.unmount()
+  })
+
+  test('a compact directive compacts between turns once the context reaches its point', async ($, on) => {
+    world(on, {
+      usage: { percent: 83, tokens: 166_000, window: 200_000, usd: 1 },
+      files: { [PROJECT_DIRECTIVES]: 'compact at ion-storm\n' },
+    })
+    const compactions: string[] = []
+    on('session.compact', (_, e) => {
+      compactions.push(e.trigger)
+      return { skip: 'the test keeps the conversation' }
+    })
+    on('turn.start', (_, e) => ({ turnId: e.turnId }))
+    on('turn.complete', () => ({ text: '' }))
+    await $.session.start(START)
+    await $.turn.start({ text: 'go', turnId: 'j1' })
+    await $.turn.complete(complete('done'))
+    expect(compactions).toHaveLength(1)
   })
 })

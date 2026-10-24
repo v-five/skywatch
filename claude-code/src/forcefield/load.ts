@@ -26,6 +26,7 @@ export async function loadDirectives($: EngineInterface): Promise<DirectiveSet> 
     const parsed = parseDirectives(text, file.source)
     set.directives.push(...parsed.directives)
     set.errors.push(...parsed.errors)
+    if (parsed.compact) set.compact = parsed.compact
   }
   return set
 }

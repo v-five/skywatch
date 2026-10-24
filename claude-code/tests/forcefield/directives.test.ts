@@ -23,7 +23,13 @@ describe('directives', () => {
     expect(report).toBe(
       'Directives, the last match wins (~/.claude/skywatch.directives, then .claude/skywatch.directives):\n' +
         'block  git push                      p\n\n' +
-        'Not read (each line is `pass|hold|block <@group or command>`):\np:2  wat',
+        'Not read (each line is `pass|hold|block <@group or command>` or `compact at <step or N%>`):\np:2  wat',
     )
   })
+})
+
+test('compact at a hazard step or a percent; anything else does not read', () => {
+  expect(parseDirectives('compact at ion-storm', 'p').compact).toEqual({ pct: 80, target: 'ion-storm', source: 'p' })
+  expect(parseDirectives('compact at 85%', 'p').compact).toEqual({ pct: 85, target: '85%', source: 'p' })
+  expect(parseDirectives('compact at loud', 'p').errors).toEqual(['p:1  compact at loud'])
 })

@@ -89,6 +89,8 @@ block    git push origin main     # a command matches as typed, at the start of 
 pass     rm /tmp/*                # * matches anything
 ```
 
+One more line, `compact at <step or N%>` (`compact at ion-storm`, `compact at 85%`), compacts the conversation between turns once the context reaches that point, and the black box notes it from Comms. Off unless you write it; the project's file wins over yours.
+
 The last directive that matches wins: SkyWatch's defaults come first, then your file, then the project's. A held `rm` whose targets are all inside `/tmp` or `$TMPDIR` passes unless a directive names the command. The Force field row counts blocked commands once you have a `block` directive. In auto mode, Claude Code's classifier may answer a held command instead of you; only `block` can't be answered.
 
 `/skywatch directives` lists the directives in force, where each came from, and any line it couldn't read.

@@ -20,6 +20,8 @@ export type Runtime = {
   paletteFiles: PaletteFiles
   /** The kind of the last sign of a stuck session logged, so each kind is logged once. */
   lastDistress: string | null
+  /** A directive's compaction is running: another must not start. */
+  isCompacting: boolean
   /** A client module failed in this load: drawings leave client modules out until a reload. */
   hasClientFault: boolean
 }
@@ -34,6 +36,7 @@ export function createRuntime(config: Config): Runtime {
     places: NO_PLACES,
     paletteFiles: { overrides: {}, errors: [] },
     lastDistress: null,
+    isCompacting: false,
     hasClientFault: false,
   }
 }

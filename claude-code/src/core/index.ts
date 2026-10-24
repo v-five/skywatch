@@ -1,6 +1,7 @@
 export * from './config'
 export * from './format'
 export * from './guards'
+export * from './hazards'
 export * from './paths'
 export * from './redact'
 export * from './text'
