@@ -1,5 +1,5 @@
 import type { RenderNode } from 'claude-code'
-import { fmtSpeed, kTokens, prettyModel } from '../../core'
+import { fmtSpeed, kTokens, prettyModel, printable } from '../../core'
 import { avgSpeed, isEffort } from '../../domain'
 import type { ModuleProps, ModuleView } from '../context'
 import { ModuleFrame } from '../frame'
@@ -68,12 +68,12 @@ function Scanning({ ui, data }: ModuleProps): RenderNode | null {
       <Ruler ui={ui} />
       <Row ui={ui} label="Scanning">
         <Text color={ui.colors.bridge} bold>
-          {reading}
+          {printable(reading)}
         </Text>
       </Row>
       {bridge.isRunning && title && bridge.doing ? (
         <Row ui={ui} label="">
-          <Text dimColor>{bridge.doing}</Text>
+          <Text dimColor>{printable(bridge.doing)}</Text>
         </Row>
       ) : null}
     </Box>

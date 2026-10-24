@@ -1,5 +1,5 @@
 import type { RenderNode } from 'claude-code'
-import { fmtTimer } from '../core'
+import { fmtTimer, printable } from '../core'
 import { EFFORTS, effortLevel, effortPct } from '../domain'
 import type { DrawContext, UiContext } from './context'
 import { hazardOf } from './hazard'
@@ -73,8 +73,10 @@ export function Tally(props: { ui: UiContext; color: string; label: string; coun
 
 /** Long text shows two lines cut with an ellipsis; a mark on the last line opens the rest and closes it again. */
 export function Fold(props: { ui: UiContext; foldKey: string; text: string; width: number; color?: string; isDim?: boolean }): RenderNode {
-  const { ui, foldKey, text } = props
+  const { ui, foldKey } = props
   const { Box, Text, Button } = ui.els
+  // Stored text may predate cleaning, and one control character makes a surface refuse the whole pane.
+  const text = printable(props.text)
   const max = Math.max(FOLD_MIN_WIDTH, props.width - CHEVRON_WIDTH) * FOLD_LINES
   const isLong = text.length > max
   const isOpen = ui.view.unfolded.includes(foldKey)

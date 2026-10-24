@@ -1,5 +1,6 @@
 import type { RenderNode } from 'claude-code'
 import type { PlanStatus } from '../../../types'
+import { printable } from '../../core'
 import { groupStatus, type PlanGroup, planGroups } from '../../domain'
 import type { ModuleProps, ModuleView, UiContext } from '../context'
 import { ModuleFrame } from '../frame'
@@ -24,7 +25,7 @@ function StepLine({ ui, text, status, indent }: { ui: UiContext; text: string; s
       <Text>{indent}</Text>
       <Text color={ui.colors[look.role]}>{`${look.mark} `}</Text>
       <Text bold={status === 'running'} dimColor={look.isDim} strikethrough={status === 'skipped'}>
-        {text}
+        {printable(text)}
       </Text>
     </Text>
   )

@@ -1,6 +1,6 @@
 import type { RenderNode } from 'claude-code'
 import type { Shuttle } from '../../../../types'
-import { capitalize, kTokens, prettyModel, relativePaths, shorten } from '../../../core'
+import { capitalize, kTokens, prettyModel, printable, relativePaths, shorten } from '../../../core'
 import { isEffort, titleOf } from '../../../domain'
 import type { UiContext } from '../../context'
 import { FOLD_MARK_WIDTH, FoldMark } from '../../frame'
@@ -80,7 +80,7 @@ function CardMission({ ui, shuttle }: CardProps): RenderNode | null {
     <Box flexDirection="column">
       {shuttle.description ? (
         <Row ui={ui} label="Mission">
-          <Text>{capitalize(shuttle.description)}</Text>
+          <Text>{printable(capitalize(shuttle.description))}</Text>
         </Row>
       ) : null}
       {brief && brief !== shuttle.description ? (
@@ -146,10 +146,10 @@ function CardReading({ ui, shuttle }: CardProps): RenderNode {
     <RowBlock ui={ui} label="Scanning">
       {reading ? (
         <Text color={ui.colors.shuttles} bold wrap="wrap">
-          {reading}
+          {printable(reading)}
         </Text>
       ) : (
-        <Text dimColor>{shuttle.doing ?? 'starting'}</Text>
+        <Text dimColor>{printable(shuttle.doing ?? 'starting')}</Text>
       )}
     </RowBlock>
   )

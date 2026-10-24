@@ -1,5 +1,5 @@
 import type { RenderNode } from 'claude-code'
-import { capitalize } from '../../../core'
+import { capitalize, printable } from '../../../core'
 import type { ActiveHold } from '../../../forcefield'
 import type { UiContext } from '../../context'
 import { Row } from '../../layout'
@@ -28,7 +28,7 @@ export function HeldCall({ ui, held }: { ui: UiContext; held: ActiveHold }): Ren
       </Box>
       <Row ui={ui} label="">
         <Text color={ui.colors.held} bold>
-          {held.headline}
+          {printable(held.headline)}
         </Text>
       </Row>
       <Row ui={ui} label="">
@@ -36,7 +36,7 @@ export function HeldCall({ ui, held }: { ui: UiContext; held: ActiveHold }): Ren
       </Row>
       {held.lines.slice(0, LINES_SHOWN).map(line => (
         <Row ui={ui} label="">
-          <Text dimColor>{line}</Text>
+          <Text dimColor>{printable(line)}</Text>
         </Row>
       ))}
       {hidden > 0 ? (
@@ -46,7 +46,7 @@ export function HeldCall({ ui, held }: { ui: UiContext; held: ActiveHold }): Ren
       ) : null}
       {held.note ? (
         <Row ui={ui} label="">
-          <Text color={ui.colors.faint}>{held.note}</Text>
+          <Text color={ui.colors.faint}>{printable(held.note)}</Text>
         </Row>
       ) : null}
       <Row ui={ui} label="">
