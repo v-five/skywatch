@@ -2,7 +2,6 @@ import type { RenderNode, RenderSurface } from 'claude-code'
 import type { Bridge, LastJump, Shields, Usage } from '../../types'
 import { fmtDuration, kTokens } from '../core'
 import { lastDelta, shieldsSummary } from '../domain'
-import { AIRLOCK_MARK } from './beacon'
 import type { DrawContext } from './context'
 import { hazardOf } from './hazard'
 import { SEPARATOR } from './metrics'
@@ -37,7 +36,8 @@ export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump
   const pct = Math.round(usage.pct ?? 0)
   const hazard = hazardOf(pct, draw.space)
   const last = lastJumpParts(usage, bridge, lastJump)
-  const waiting = shieldsSummary(shields).ask
+  // A prompt waiting for an answer turns the loader to the waiting colour; words would change the band's height.
+  const isWaiting = shieldsSummary(shields).ask > 0
   return (
     // In the terminal the band sits right under the transcript, so it keeps a row of space above.
     <Box flexDirection="row" justifyContent="space-between" paddingX={1} marginTop={surface === 'terminal' ? 1 : 0}>
@@ -45,7 +45,6 @@ export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump
         <Text color={hazard.color} bold>{`${hazard.icon}  ${hazard.word}  `}</Text>
         <Bar ui={draw} pct={pct} />
         <Text bold>{`  ${pct}%`}</Text>
-        {waiting > 0 ? <Text color={draw.colors.waiting} bold>{`  ${AIRLOCK_MARK} Airlock ${waiting} waiting`}</Text> : null}
         {usage.window ? <Text dimColor>{`  ${kTokens(usage.tokens ?? 0)} / ${kTokens(usage.window)}`}</Text> : null}
         {last.length > 0 ? <Text color={draw.colors.faint}>{SEPARATOR}</Text> : null}
         {last.length > 0 ? <Text dimColor wrap="truncate">{`Last jump ${last.join(' · ')}`}</Text> : null}
@@ -55,8 +54,8 @@ export function Viewscreen({ draw, surface, bodyColumns, usage, bridge, lastJump
           ui={draw}
           connectorKey="band-loader"
           width={LOADER_WIDTH}
-          color={hazard.color}
-          isActive={bridge.isRunning || Boolean(bridge.command)}
+          color={isWaiting ? draw.colors.waiting : hazard.color}
+          isActive={isWaiting || bridge.isRunning || Boolean(bridge.command)}
           spacing={LOADER_SPACING}
         />
       ) : null}

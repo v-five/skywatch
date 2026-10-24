@@ -71,7 +71,7 @@ export function Tally(props: { ui: UiContext; color: string; label: string; coun
   )
 }
 
-/** Long text shows two lines cut with an ellipsis; a chevron beside them opens the rest and closes it again. */
+/** Long text shows two lines cut with an ellipsis; a mark on the last line opens the rest and closes it again. */
 export function Fold(props: { ui: UiContext; foldKey: string; text: string; width: number; color?: string; isDim?: boolean }): RenderNode {
   const { ui, foldKey, text } = props
   const { Box, Text, Button } = ui.els
@@ -79,7 +79,7 @@ export function Fold(props: { ui: UiContext; foldKey: string; text: string; widt
   const isLong = text.length > max
   const isOpen = ui.view.unfolded.includes(foldKey)
   return (
-    <Box alignItems="center">
+    <Box alignItems="flex-end">
       <Box flexShrink={1}>
         <Text color={props.color} dimColor={props.isDim} wrap="wrap">
           {isLong && !isOpen ? `${text.slice(0, max - 1).trimEnd()}…` : text}
