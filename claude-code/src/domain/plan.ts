@@ -14,16 +14,20 @@ function itemText(item: Record<string, unknown>): string {
   return typeof item.subject === 'string' ? item.subject : ''
 }
 
-/** A rewritten list: its own statuses, and a step it dropped before finishing kept as skipped. */
+/** A rewritten list: its own statuses, and a step it dropped before finishing kept as skipped; a list sharing no step is a new plan. */
 function fromItems(before: readonly PlanStep[], items: readonly unknown[]): PlanStep[] {
   const steps = items.filter(isRecord).map(item => ({
     text: capitalize(itemText(item)),
     status: STATUS_BY_WORD.get(String(item.status)) ?? 'pending',
   }))
   const texts = new Set(steps.map(step => step.text))
+  if (!before.some(step => texts.has(step.text))) return steps
   const dropped = before.filter(step => step.status !== 'done' && step.status !== 'skipped' && !texts.has(step.text))
   return [...steps, ...dropped.map(step => ({ ...step, status: 'skipped' as const }))]
 }
+
+/** The desktop app's wrap-up checks the whole list off. */
+const WRAP_UP_TOOL = /(^|__)wrap_up$/
 
 function withStatus(steps: readonly PlanStep[], at: number, status: PlanStatus): PlanStep[] {
   return steps.map((step, i) => (i === at ? { ...step, status } : step))
@@ -48,6 +52,7 @@ function marked(steps: readonly PlanStep[], input: Record<string, unknown>): Pla
 export function planAfter(steps: readonly PlanStep[], tool: string, input: unknown): PlanStep[] | undefined {
   const call = isRecord(input) ? input : {}
   if (tool === 'TodoWrite' && Array.isArray(call.todos)) return fromItems(steps, call.todos)
+  if (WRAP_UP_TOOL.test(tool)) return steps.map(step => (step.status === 'skipped' ? step : { ...step, status: 'done' as const }))
   if (!tool.endsWith('update_plan')) return undefined
   if (Array.isArray(call.items)) return fromItems(steps, call.items)
   if (call.advance === true) return advanced(steps)

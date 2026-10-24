@@ -5,7 +5,7 @@ import type { PaneActions } from '../domain'
 import type { ActiveHold } from '../forcefield'
 import { hazardOf } from './hazard'
 import { PANE_MIN_WIDTH } from './metrics'
-import type { Colors, Palette, Space, SvgColors } from './palette'
+import type { Colors, Palette, Space } from './palette'
 
 /** What a drawing outside the pane needs: the surface's elements, its palette, and whether it runs client modules. */
 export type DrawContext = {
@@ -13,7 +13,6 @@ export type DrawContext = {
   readonly hasClient: boolean
   readonly colors: Colors
   readonly space: Space
-  readonly svg: SvgColors
 }
 
 /** What every pane component draws with: the elements, the clock, the pane's width and its actions. */
@@ -53,7 +52,7 @@ export type ModuleView = { isEmpty(data: PaneData): boolean; draw(props: ModuleP
 
 /** `canAnimate` is false once a client module has failed in this load: the surface then draws without any. */
 export function drawContext(els: ElementTable, palette: Palette, canAnimate = true): DrawContext {
-  return { els, hasClient: canAnimate && 'Client' in els, colors: palette.colors, space: palette.space, svg: palette.svg }
+  return { els, hasClient: canAnimate && 'Client' in els, colors: palette.colors, space: palette.space }
 }
 
 /** The pane's drawing context from what the surface asked for and the session's readings. */

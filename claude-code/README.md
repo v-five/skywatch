@@ -44,7 +44,7 @@ How full the context window is. The band above the prompt, the header's radar `�
 
 | Module | Shows |
 | --- | --- |
-| `⌬` Bridge | the main model: Helm (effort, model, mode), Hull (context), Warp (request speed), what it is Scanning now, the Shuttles count and their Flight paths |
+| `⌬` Bridge | the main model: Helm (effort, model, mode), Hull (context), Warp (request speed), what it is Scanning now, the Shuttles count and, while one flies, each shuttle's flight time as a gauge against the longest |
 | `⟁` Council | when an architect or advisor agent was consulted, and its last transmission |
 | `⛨` Shields | every permission check: Sensors (the latest checks), Protocols (your Claude Code rules), Airlock (prompts you answered; Autopilot in auto mode), Force field (what your directives held or blocked) and Decks (by kind of tool) |
 | `⊹` Flight plan | the bridge's task list: each step done, in progress, pending or skipped (dropped before it was done), with progress in the title. Steps that share a name before `:` (`Fix findings: force field`, `Fix findings: domain`) form a phase; a finished phase folds to one line |

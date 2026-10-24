@@ -101,19 +101,6 @@ export function shownShuttles(fleet: readonly Shuttle[], docked: number): Shuttl
 }
 
 /** A shuttle's bar, in cells: the gap before it, its length and the gap after. */
-export type FlightPath = { id: string; before: number; bar: number; after: number }
-
-/** Each shuttle's bar on one shared axis from the first launch to now, in `width` cells. */
-export function flightPaths(fleet: readonly Shuttle[], now: number, width: number): FlightPath[] {
-  const start = Math.min(...fleet.map(shuttle => shuttle.spawnedAt).filter(at => at > 0), now)
-  const span = Math.max(1, now - start)
-  return fleet.map(shuttle => {
-    const from = Math.min(width, Math.floor(((Math.max(shuttle.spawnedAt, start) - start) / span) * width))
-    const to = Math.min(width, Math.max(from + 1, Math.ceil((((shuttle.endedAt ?? now) - start) / span) * width)))
-    return { id: shuttle.id, before: from, bar: to - from, after: width - to }
-  })
-}
-
 export function stepProbe(probes: readonly Probe[], id: string, at: number): Probe[] {
   const found = probes.find(probe => probe.id === id)
   const next = found

@@ -24,21 +24,6 @@ function statusWord(shuttle: Shuttle): string {
   return shuttle.lastStop === MAX_TOKENS ? MAX_TOKENS : SHUTTLE_STATUS[shuttle.status].word
 }
 
-/** The shuttle's icon, its hotkey the card's number, in front of the title like every card's icon; it folds the card too. */
-function ShuttleIcon({ ui, shuttle, index, isFolded }: CardProps & { isFolded: boolean }): RenderNode {
-  const { Button } = ui.els
-  return (
-    <Button
-      key={`shuttle-${shuttle.id}`}
-      plain
-      dimColor={isFolded}
-      {...(index < HOTKEYS ? { hotkey: String(index + 1) } : {})}
-      label={SHUTTLE_ICON}
-      onPress={() => ui.actions.toggleShuttle(shuttle.id, shuttle.status === 'running')}
-    />
-  )
-}
-
 /** The title row: the icon and title, a loader while it flies, its status, its flight time while folded, and its fold mark. */
 function ShuttleTitle(props: CardProps & { isFolded: boolean }): RenderNode {
   const { ui, shuttle, isFolded } = props
@@ -52,10 +37,8 @@ function ShuttleTitle(props: CardProps & { isFolded: boolean }): RenderNode {
   return (
     <Box justifyContent="space-between">
       <Box flexShrink={1}>
-        <ShuttleIcon {...props} />
-        <Text> </Text>
         <Text color={isFolded ? ui.colors.dim : ui.colors.shuttles} bold={!isFolded} wrap="truncate">
-          {shorten(name, nameWidth)}
+          {`${SHUTTLE_ICON} ${shorten(name, nameWidth)}`}
         </Text>
       </Box>
       {isInFlight && ui.hasClient && room >= MIN_LOADER_ROOM ? (
@@ -77,8 +60,9 @@ function ShuttleTitle(props: CardProps & { isFolded: boolean }): RenderNode {
         ) : null}
         <FoldMark
           ui={ui}
-          markKey={`shuttle-fold-${shuttle.id}`}
+          markKey={`shuttle-${shuttle.id}`}
           isFolded={isFolded}
+          {...(props.index < HOTKEYS ? { hotkey: String(props.index + 1) } : {})}
           onPress={() => ui.actions.toggleShuttle(shuttle.id, isInFlight)}
         />
       </Box>

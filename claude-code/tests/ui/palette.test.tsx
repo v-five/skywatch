@@ -4,15 +4,9 @@ import { paletteOf, parsePaletteFile } from '../../src/ui'
 import { paneRequest, START, skywatch } from '../support/drive'
 import { HOME, world } from '../support/world'
 
-const HEX = /^#[0-9a-f]{6}$/i
-
 describe('palettes', () => {
-  test('every preset paints eight distinct steps, and its SVG colours are hex', () => {
-    for (const name of PALETTE_NAMES) {
-      const { space, svg } = paletteOf(name)
-      expect(new Set(Object.values(space)).size).toBe(8)
-      for (const color of Object.values(svg)) expect(color).toMatch(HEX)
-    }
+  test('every preset paints eight distinct steps', () => {
+    for (const name of PALETTE_NAMES) expect(new Set(Object.values(paletteOf(name).space)).size).toBe(8)
   })
 
   test('roles follow the steps they are drawn from; claude keeps theme keys for its roles', () => {

@@ -1,49 +1,43 @@
 import type { RenderNode } from 'claude-code'
-import { shorten } from '../../../core'
-import { flightPaths, titleOf } from '../../../domain'
+import { fmtDuration, shorten } from '../../../core'
+import { titleOf } from '../../../domain'
 import type { ModuleProps } from '../../context'
+import { GAUGE_WIDTH } from '../../metrics'
 import { SHUTTLE_STATUS } from '../../theme'
+import { gaugeCells } from '../../widgets'
 
 const SHOWN = 10
-const ROW_HEIGHT = 18
-const WIDTH_PX = 520
-const LABEL_PX = 150
-const AXIS_END_MARGIN_PX = 10
-const AXIS_PX = WIDTH_PX - LABEL_PX - AXIS_END_MARGIN_PX
-const AXIS_CELLS = 100
-const LABEL_MAX = 22
-const LABEL_X = 4
-const LABEL_BASELINE = 13
-const FONT_SIZE = 11
-const BAR_TOP = 4
-const BAR_HEIGHT = 10
-const BAR_RADIUS = 3
-const BAR_MIN_PX = 3
-const SVG_PADDING = 4
+/** A title's column: the longest title shown, up to this many cells, and two to spare. */
+const TITLE_MAX = 22
+const TITLE_GAP = 2
 
-/** The shuttles' flight paths as SVG bars on one time axis; desktop surfaces only. */
+/** Each shuttle's flight time as a gauge against the longest one, in its status colour, then the time itself. */
 export function FlightPaths({ ui, data }: ModuleProps): RenderNode | null {
-  if (ui.surface === 'terminal' || !('Svg' in ui.els) || data.fleet.length === 0) return null
-  const { Svg } = ui.els
+  const { Box, Text } = ui.els
   const fleet = data.fleet.slice(-SHOWN)
-  const paths = flightPaths(fleet, ui.now, AXIS_CELLS)
-  const rows = fleet.map((shuttle, i) => {
-    const path = paths[i]
-    const barX = LABEL_PX + ((path?.before ?? 0) / AXIS_CELLS) * AXIS_PX
-    const width = Math.max(BAR_MIN_PX, ((path?.bar ?? 1) / AXIS_CELLS) * AXIS_PX)
-    const label = shorten(titleOf(shuttle), LABEL_MAX).replace(/[<&>]/g, '')
-    return (
-      `<text x="${LABEL_X}" y="${i * ROW_HEIGHT + LABEL_BASELINE}" font-size="${FONT_SIZE}" fill="${ui.svg.label}">${label}</text>` +
-      `<rect x="${barX}" y="${i * ROW_HEIGHT + BAR_TOP}" width="${width}" height="${BAR_HEIGHT}" rx="${BAR_RADIUS}" fill="${ui.svg[SHUTTLE_STATUS[shuttle.status].svg]}"/>`
-    )
-  })
-  const height = fleet.length * ROW_HEIGHT + SVG_PADDING
+  if (fleet.length === 0) return null
+  const flights = fleet.map(shuttle => Math.max(0, (shuttle.endedAt ?? ui.now) - shuttle.spawnedAt))
+  const longest = Math.max(1, ...flights)
+  const titles = fleet.map(shuttle => shorten(titleOf(shuttle), TITLE_MAX))
+  const titleWidth = Math.max(...titles.map(title => title.length)) + TITLE_GAP
   return (
-    <Svg
-      source={`<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH_PX}" height="${height}" viewBox="0 0 ${WIDTH_PX} ${height}">${rows.join('')}</svg>`}
-      alt={`${data.fleet.length} shuttles on a time axis`}
-      width={WIDTH_PX}
-      height={height}
-    />
+    <Box flexDirection="column">
+      {fleet.map((shuttle, i) => {
+        const flight = flights[i] ?? 0
+        const cells = gaugeCells((flight / longest) * 100, GAUGE_WIDTH)
+        return (
+          <Box>
+            <Box width={titleWidth} flexShrink={0}>
+              <Text dimColor wrap="truncate">
+                {titles[i]}
+              </Text>
+            </Box>
+            <Text color={ui.colors[SHUTTLE_STATUS[shuttle.status].role]}>{cells.on}</Text>
+            <Text color={ui.colors.faint}>{cells.off}</Text>
+            <Text dimColor>{`  ${fmtDuration(flight)}`}</Text>
+          </Box>
+        )
+      })}
+    </Box>
   )
 }

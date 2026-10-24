@@ -1,6 +1,6 @@
 import type { BlackboxEntry, ShuttleStatus, Verdict } from '../../types'
 import { WRITERS } from '../domain'
-import type { Colors, Role, SvgColors } from './palette'
+import type { Colors, Role } from './palette'
 
 export const VERDICT_STYLE: Readonly<Record<Verdict, { role: Role; word: string }>> = {
   rule: { role: 'allowed', word: 'cleared' },
@@ -12,11 +12,11 @@ export const VERDICT_STYLE: Readonly<Record<Verdict, { role: Role; word: string 
 }
 
 /** A shuttle's status: running is in flight, done has docked, failed is lost. */
-export const SHUTTLE_STATUS: Readonly<Record<ShuttleStatus, { word: string; glyph: string; role: Role; svg: keyof SvgColors }>> = {
-  running: { word: 'in flight', glyph: '◐', role: 'shuttles', svg: 'running' },
-  done: { word: 'docked', glyph: '✓', role: 'shields', svg: 'done' },
-  failed: { word: 'lost', glyph: '✗', role: 'alert', svg: 'failed' },
-  stopped: { word: 'stopped', glyph: '■', role: 'shuttles', svg: 'other' },
+export const SHUTTLE_STATUS: Readonly<Record<ShuttleStatus, { word: string; glyph: string; role: Role }>> = {
+  running: { word: 'in flight', glyph: '◐', role: 'shuttles' },
+  done: { word: 'docked', glyph: '✓', role: 'shields' },
+  failed: { word: 'lost', glyph: '✗', role: 'alert' },
+  stopped: { word: 'stopped', glyph: '■', role: 'shuttles' },
 }
 
 const WRITER_ROLE: ReadonlyMap<string, Role> = new Map([

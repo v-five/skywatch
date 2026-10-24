@@ -5,7 +5,6 @@ import {
   applyStep,
   dropProbe,
   endProbe,
-  flightPaths,
   isProbeActive,
   landShuttle,
   newShuttle,
@@ -93,14 +92,6 @@ describe('the fleet', () => {
       landShuttle(shuttle('c'), { status: 'failed', at: 2, answer: '' }),
     ]
     expect(shownShuttles(fleet, 6).map(s => s.id)).toEqual(['b', 'c', 'a'])
-  })
-
-  test('flight paths share one axis', () => {
-    const fleet = [shuttle('a', 1000), { ...shuttle('b', 6000), endedAt: 8000 }]
-    expect(flightPaths(fleet, 11_000, 10)).toEqual([
-      { id: 'a', before: 0, bar: 10, after: 0 },
-      { id: 'b', before: 5, bar: 2, after: 3 },
-    ])
   })
 })
 

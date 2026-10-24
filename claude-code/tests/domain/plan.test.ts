@@ -26,6 +26,12 @@ describe('the plan', () => {
     expect(marked.map(step => step.status)).toEqual(['done', 'done', 'running'])
   })
 
+  test('a list sharing no step with the last is a new plan, and the wrap-up checks every step off', () => {
+    const old = planAfter([], 'TodoWrite', { todos: [item('old', 'in_progress')] }) ?? []
+    expect(planAfter(old, 'TodoWrite', { todos: [item('new', 'pending')] })).toEqual([{ text: 'New', status: 'pending' }])
+    expect(planAfter(old, 'mcp__ccd_turn__wrap_up', { recap: 'done' })).toEqual([{ text: 'Old', status: 'done' }])
+  })
+
   test('steps sharing a name before a colon form a phase; one alone stays a step', () => {
     const steps: PlanStep[] = [
       { text: 'Refactor', status: 'done' },

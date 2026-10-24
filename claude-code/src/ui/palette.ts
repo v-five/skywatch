@@ -25,10 +25,7 @@ export const ROLES = [
 export type Role = (typeof ROLES)[number]
 export type Colors = Readonly<Record<Role, string>>
 
-/** SVG cannot name theme keys or ANSI colours: hex only. */
-export type SvgColors = Readonly<{ running: string; done: string; failed: string; other: string; label: string }>
-
-export type Palette = { readonly space: Space; readonly colors: Colors; readonly svg: SvgColors }
+export type Palette = { readonly space: Space; readonly colors: Colors }
 
 /** Colours a palette file names, by step or role. */
 export type PaletteOverrides = Readonly<Partial<Record<SpaceStep | Role, string>>>
@@ -43,9 +40,6 @@ const SKYWATCH_SPACE: Space = {
   ionStorm: '#f97316',
   eventHorizon: '#ef4444',
 }
-
-/** Mid-tone colours that read on light and dark backgrounds, for palettes whose colours are not hex. */
-const SKYWATCH_SVG: SvgColors = { running: '#3b82f6', done: '#16a34a', failed: '#dc2626', other: '#8b5cf6', label: '#6b7280' }
 
 /** The terminal's own sixteen colours: whatever theme the terminal runs paints the scale. */
 const ANSI_SPACE: Space = {
@@ -114,15 +108,6 @@ function rolesOf(space: Space): Colors {
   }
 }
 
-const HEX = /^#[0-9a-f]{6}$/i
-
-function svgOf(space: Space): SvgColors {
-  const isHex = SPACE_STEPS.every(step => HEX.test(space[step]))
-  return isHex
-    ? { running: space.asteroids, done: space.nebula, failed: space.eventHorizon, other: space.ionStorm, label: SKYWATCH_SVG.label }
-    : SKYWATCH_SVG
-}
-
 function pick<K extends SpaceStep | Role>(keys: readonly K[], overrides: PaletteOverrides): Partial<Record<K, string>> {
   const picked: Partial<Record<K, string>> = {}
   for (const key of keys) {
@@ -137,7 +122,7 @@ export function paletteOf(name: PaletteName, overrides: PaletteOverrides = {}): 
   const preset = PRESETS[name]
   const space: Space = { ...preset.space, ...pick(SPACE_STEPS, overrides) }
   const colors: Colors = { ...rolesOf(space), ...preset.roles, ...pick(ROLES, overrides) }
-  return { space, colors, svg: svgOf(space) }
+  return { space, colors }
 }
 
 export const DEFAULT_PALETTE: Palette = paletteOf('skywatch')

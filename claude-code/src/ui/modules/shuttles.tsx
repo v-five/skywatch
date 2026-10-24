@@ -10,21 +10,18 @@ const DOCKED_SHOWN = 6
 const HANGAR_HOTKEY = 'h'
 const HANGAR_ICON = '⇡'
 
-/** The hangar's one line: how many shuttles have landed, and the chevron that shows them. */
+/** The hangar's one line: how many shuttles have landed, and the mark that shows them. */
 function Hangar({ ui, landed }: { ui: UiContext; landed: readonly Shuttle[] }): RenderNode {
-  const { Box, Button, Text } = ui.els
+  const { Box, Text } = ui.els
   const lost = landed.filter(shuttle => shuttle.status !== 'done').length
   const isOpen = ui.view.isHangarOpen === true
   return (
     <Border ui={ui} borderColor={ui.colors.shuttles} isBorderDim>
       <Box justifyContent="space-between">
-        <Box>
-          <Button key="hangar" plain dimColor hotkey={HANGAR_HOTKEY} label={HANGAR_ICON} onPress={() => ui.actions.toggleHangar()} />
-          <Text color={ui.colors.dim}>{' Hangar'}</Text>
-        </Box>
+        <Text color={ui.colors.dim}>{`${HANGAR_ICON} Hangar`}</Text>
         <Box flexShrink={0}>
           <Text color={ui.colors.dim}>{`${landed.length - lost} docked${lost > 0 ? ` · ${lost} lost` : ''}`}</Text>
-          <FoldMark ui={ui} markKey="hangar-fold" isFolded={!isOpen} onPress={() => ui.actions.toggleHangar()} />
+          <FoldMark ui={ui} markKey="hangar" isFolded={!isOpen} hotkey={HANGAR_HOTKEY} onPress={() => ui.actions.toggleHangar()} />
         </Box>
       </Box>
     </Border>
