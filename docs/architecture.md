@@ -6,7 +6,7 @@ The structure the refactor follows, file by file. Behaviour, user-visible text, 
 
 Verified by running `claude plugin validate` and `claude plugin test` on a scratch copy of the mod. A module that breaks rules 1 to 4 does not load.
 
-1. **Atoms live with their reads and writes.** `read($, x)` and `update($, x, fn)` are accepted only when `x` is an atom made by `atom({ plugin: 'skywatch', key: '…' } as const, …)` in the same file. An atom imported from another file, an atom passed as a parameter, or `ATOMS[key]` is refused. So one file holds all 13 atoms and every `read`/`update`.
+1. **Atoms live with their reads and writes.** `read($, x)` and `update($, x, fn)` are accepted only when `x` is an atom made by `atom({ plugin: 'skywatch', key: '…' } as const, …)` in the same file. An atom imported from another file, an atom passed as a parameter, or `ATOMS[key]` is refused. So one file holds all 14 atoms and every `read`/`update`.
 2. **`$` is spelled literally.** It may be passed as the first argument to a named `function` declaration (any file, through barrels, any depth) or captured by a closure inside such a function. It may not be stored in an object, passed through a table (`TABLE[kind]($, …)`), or passed to an arrow function stored in a `const` in another file. So every helper that takes `$` is a top-level `function` declaration, and dispatch over `$` helpers is a `switch`.
 3. **`on` is spelled literally**: `on('<event>', matcher?, hook)`. It may be passed on as a parameter named `on`.
 4. **Hook matchers are literals** (`{ component: 'Pane', requestId: 'skywatch' }`, `{ command: 'skywatch' }`). A constant imported from another file reads as `requestId=?`.
@@ -26,7 +26,7 @@ Layers, lowest first. Each folder is one layer; inside a layer, files are split 
 | 0 | `src/core/` | no | generic helpers, config |
 | 1 | `src/domain/` | no | defaults, normalizers and reducers for each state key |
 | 2 | `src/forcefield/` | only `folders.ts`, `load.ts`, `hold.ts`, `measure/*` | risky-command classification, directives, measures |
-| 3 | `src/state/` | yes | the 13 atoms, typed access, shared state actions |
+| 3 | `src/state/` | yes | the 14 atoms, typed access, shared state actions |
 | 3 | `src/ui/` | no | components, theme, client modules |
 | 4 | `src/events/` | yes | `on(...)` registrations and the runtime |
 | 5 | `hooks/skywatch.ts` | no | `register` |
@@ -74,7 +74,7 @@ skywatch/
                    classify.ts · classifiers/ (types, delete, git, infra, publish, database, index: a Map by
                    program) · secrets.ts · directives.ts · verdict.ts · folders.ts ($) · load.ts ($) · hold.ts ($) ·
                    measure/ (result.ts builders; paths.ts, git.ts, refs.ts measurers; index.ts switch)
-      state/       atoms.ts (the 13 atoms, get/patch per key, migrateState) · log.ts · council.ts · bridge.ts ·
+      state/       atoms.ts (the 14 atoms, get/patch per key, migrateState) · log.ts · council.ts · bridge.ts ·
                    mission.ts (recordUsage, readUsage, costNow, contextNow, addJumpTokens) · session.ts
                    (resetAll, loadTotals, saveTotals, followSession) · view.ts (paneActions)
       ui/          context.ts (DrawContext, UiContext, PaneData, ModuleView, uiContext) · palette.ts (presets) · theme.ts (status looks) ·

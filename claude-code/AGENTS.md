@@ -11,7 +11,7 @@ The plugin folder that ships. User docs: [README.md](README.md). Repo rules: [..
 - Every file the entry imports is `.ts` or `.tsx`, imported with a static `import`. A dynamic `import()` stops the module from loading.
 - The module has no DOM and no Node. Everything outside it goes through `$` (state, store, process, fs, clock, UI).
 - JSX compiles against the global `h`. Elements come from `$.ui.resolve(e)`, never from imports.
-- `read` and `update` work only on atoms declared in the same file by a literal ref: all 13 live in `src/state/atoms.ts`, behind `get<Key>` and `patch<Key>`.
+- `read` and `update` work only on atoms declared in the same file by a literal ref: all 14 live in `src/state/atoms.ts`, behind `get<Key>` and `patch<Key>`.
 - A function that takes `$` is a top-level `function` declaration with `$` first. `$` never goes into an object, a table or an arrow `const`; dispatch over such functions is a `switch`.
 - Hook matchers (`{ component: 'Pane', requestId: 'skywatch' }`) and `$.command.register`'s name are string literals.
 - A `Client` element's `module` is a string literal relative to the file that holds the JSX. Only `src/ui/widgets.tsx` draws them (`./clients/clock.tsx`, `./clients/loader.tsx`).
