@@ -1,5 +1,5 @@
 answers its own command: command.run{command=skywatch}
-calls: $.clock.now, $.command.register, $.fs.read, $.process.run, $.session.cwd, $.session.id, $.session.usage, $.state.get, $.state.set, $.store.get, $.store.set, $.ui.close, $.ui.invalidate, $.ui.open, $.ui.resolve, $.ui.status
+calls: $.clock.now, $.command.register, $.fs.read, $.process.run, $.session.compact, $.session.cwd, $.session.id, $.session.usage, $.state.get, $.state.set, $.store.get, $.store.set, $.ui.close, $.ui.invalidate, $.ui.open, $.ui.resolve, $.ui.status
 gating hook without .catch: agent.offer
 gating hook without .catch: agent.spawn
 gating hook without .catch: classic.PostCompact
