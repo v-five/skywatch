@@ -22,6 +22,7 @@ function ProbesModule({ ui, data }: ModuleProps): RenderNode {
   const active = data.probes.filter(probe => isProbeActive(probe, ui.now)).length
   return (
     <ModuleFrame
+      foldKey="probes"
       ui={ui}
       title="◌ Probes"
       color={ui.colors.dim}

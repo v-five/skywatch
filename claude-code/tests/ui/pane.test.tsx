@@ -26,6 +26,23 @@ describe('the pane: modules', () => {
   })
 })
 
+describe('the pane: folding modules', () => {
+  test('every module has a fold mark at its title row end that folds it to that row', async ($, on) => {
+    world(on)
+    await $.session.start(START)
+    const ui = await $.ui.mount(paneRequest())
+    for (const name of ['bridge', 'shields', 'mission', 'blackbox']) {
+      expect(await ui.find({ type: 'Button', key: `module-${name}`, text: '▲' })).toBeDefined()
+    }
+    expect(await ui.find({ type: 'Text', text: 'Helm' })).toBeDefined()
+    await ui.press({ key: 'module-bridge' })
+    expect(await ui.find({ type: 'Button', key: 'module-bridge', text: '▼' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'Helm' })).toBeUndefined()
+    expect(await ui.find({ type: 'Text', text: '⌬ Bridge' })).toBeDefined()
+    await ui.unmount()
+  })
+})
+
 describe('the pane: decks', () => {
   test('a deck button counts every verdict, blocked included', async ($, on) => {
     world(on, { files: { [PROJECT_DIRECTIVES]: 'block @git-history\n' } })

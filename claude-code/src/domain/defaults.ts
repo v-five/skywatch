@@ -77,6 +77,7 @@ export const DEFAULT_TOTALS: SessionTotals = { id: '', firstSeen: 0, activeMs: 0
 export const DEFAULT_VIEW: View = {
   expanded: null,
   folded: [],
+  collapsed: [],
   isHangarOpen: false,
   deckOpen: null,
   unfolded: [],

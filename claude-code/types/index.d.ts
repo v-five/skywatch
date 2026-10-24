@@ -138,6 +138,8 @@ export type View = {
   expanded: string | null
   /** Shuttles in flight the person folded to their title row. */
   folded?: string[]
+  /** Modules the person folded to their title row, by name. */
+  collapsed?: string[]
   /** Whether the hangar shows its docked shuttles. */
   isHangarOpen?: boolean
   deckOpen: Deck | null

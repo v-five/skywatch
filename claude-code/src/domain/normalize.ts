@@ -185,7 +185,12 @@ export function normalizeLastJump(stored: unknown): LastJump | null {
 
 export function normalizeView(stored: unknown): View {
   const view = mergeDefaults(DEFAULT_VIEW, stored, { expanded: isString, deckOpen: isDeck, hazards: isHazardMode })
-  return { ...view, unfolded: listOf(view.unfolded).filter(isString), folded: listOf(view.folded).filter(isString) }
+  return {
+    ...view,
+    unfolded: listOf(view.unfolded).filter(isString),
+    folded: listOf(view.folded).filter(isString),
+    collapsed: listOf(view.collapsed).filter(isString),
+  }
 }
 
 export function normalizeCouncilRoster(stored: unknown): CouncilRoster {

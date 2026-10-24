@@ -25,6 +25,7 @@ function CouncilModule(props: ModuleProps): RenderNode {
   const moment = latestTransmission(council)?.moment
   return (
     <ModuleFrame
+      foldKey="council"
       ui={ui}
       title="⟁ Council"
       color={ui.colors.council}

@@ -9,6 +9,7 @@ export type PaneActions = {
   toggleDeck(deck: Deck): Promise<void>
   toggleShuttle(id: string, isInFlight: boolean): Promise<void>
   toggleHangar(): Promise<void>
+  toggleModule(name: string): Promise<void>
   showEntries(count: number): Promise<void>
 }
 
@@ -31,6 +32,11 @@ export function toggleShuttle(view: View, id: string, isInFlight: boolean): View
   if (!isInFlight) return { ...view, expanded: view.expanded === id ? null : id }
   const folded = view.folded ?? []
   return { ...view, folded: folded.includes(id) ? folded.filter(other => other !== id) : [...folded, id].slice(-UNFOLDED_MAX) }
+}
+
+export function toggleCollapsed(view: View, name: string): View {
+  const collapsed = view.collapsed ?? []
+  return { ...view, collapsed: collapsed.includes(name) ? collapsed.filter(other => other !== name) : [...collapsed, name] }
 }
 
 export function toggleHangar(view: View): View {

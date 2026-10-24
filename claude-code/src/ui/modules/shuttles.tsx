@@ -2,12 +2,13 @@ import type { RenderNode } from 'claude-code'
 import type { Shuttle } from '../../../types'
 import { shownShuttles } from '../../domain'
 import type { ModuleProps, ModuleView, UiContext } from '../context'
+import { FoldMark } from '../frame'
 import { Border, Stack } from '../layout'
-import { FOLD_MARK } from '../metrics'
 import { ShuttleCard } from './parts'
 
 const DOCKED_SHOWN = 6
 const HANGAR_HOTKEY = 'h'
+const HANGAR_ICON = '⇡'
 
 /** The hangar's one line: how many shuttles have landed, and the chevron that shows them. */
 function Hangar({ ui, landed }: { ui: UiContext; landed: readonly Shuttle[] }): RenderNode {
@@ -18,17 +19,13 @@ function Hangar({ ui, landed }: { ui: UiContext; landed: readonly Shuttle[] }): 
     <Border ui={ui} borderColor={ui.colors.shuttles} isBorderDim>
       <Box justifyContent="space-between">
         <Box>
-          <Button
-            key="hangar"
-            plain
-            dimColor
-            hotkey={HANGAR_HOTKEY}
-            label={isOpen ? FOLD_MARK.open : FOLD_MARK.closed}
-            onPress={() => ui.actions.toggleHangar()}
-          />
-          <Text color={ui.colors.dim}>{' ⇡ Hangar'}</Text>
+          <Button key="hangar" plain dimColor hotkey={HANGAR_HOTKEY} label={HANGAR_ICON} onPress={() => ui.actions.toggleHangar()} />
+          <Text color={ui.colors.dim}>{' Hangar'}</Text>
         </Box>
-        <Text color={ui.colors.dim}>{`${landed.length - lost} docked${lost > 0 ? ` · ${lost} lost` : ''}`}</Text>
+        <Box flexShrink={0}>
+          <Text color={ui.colors.dim}>{`${landed.length - lost} docked${lost > 0 ? ` · ${lost} lost` : ''}`}</Text>
+          <FoldMark ui={ui} markKey="hangar-fold" isFolded={!isOpen} onPress={() => ui.actions.toggleHangar()} />
+        </Box>
       </Box>
     </Border>
   )

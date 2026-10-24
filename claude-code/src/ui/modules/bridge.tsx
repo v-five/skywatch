@@ -108,6 +108,7 @@ function BridgeModule(props: ModuleProps): RenderNode {
   const state = bridge.isRunning ? '● engaged' : bridge.command ? `◐ /${bridge.command}` : '○ standby'
   return (
     <ModuleFrame
+      foldKey="bridge"
       ui={props.ui}
       title="⌬ Bridge"
       color={props.ui.colors.bridge}

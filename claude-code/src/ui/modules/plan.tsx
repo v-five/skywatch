@@ -64,6 +64,7 @@ function PlanModule({ ui, data }: ModuleProps): RenderNode {
   const cells = gaugeCells(steps.length > 0 ? (done / steps.length) * 100 : 0, GAUGE_WIDTH)
   return (
     <ModuleFrame
+      foldKey="plan"
       ui={ui}
       title="⊹ Flight plan"
       color={ui.colors.bridge}

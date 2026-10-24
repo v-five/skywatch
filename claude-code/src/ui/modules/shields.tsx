@@ -175,6 +175,7 @@ function ShieldsModule(props: ModuleProps): RenderNode {
   const note = `${summary.total} checks`
   return (
     <ModuleFrame
+      foldKey="shields"
       ui={ui}
       title="⛨ Shields"
       color={ui.colors.shields}

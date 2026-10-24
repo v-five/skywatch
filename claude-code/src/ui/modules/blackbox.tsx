@@ -58,6 +58,7 @@ function BlackboxModule({ ui, data }: ModuleProps): RenderNode {
   const hasLess = count > BLACKBOX_PAGE
   return (
     <ModuleFrame
+      foldKey="blackbox"
       ui={ui}
       title={data.viewedAgentId ? '▣ Black box · this shuttle' : '▣ Black box'}
       color={ui.colors.dim}
