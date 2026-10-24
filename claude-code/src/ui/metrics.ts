@@ -1,17 +1,3 @@
-import type { Deck } from '../../types'
-
-/** Each deck's hotkey in the pane; `app` takes `p`, as `agents` has `a`. */
-export const DECK_KEYS: Readonly<Record<Deck, string>> = {
-  file: 'f',
-  git: 'g',
-  shell: 's',
-  web: 'w',
-  agents: 'a',
-  app: 'p',
-  mcp: 'm',
-  other: 'o',
-}
-
 export const LABEL_WIDTH = 12
 export const PANE_MIN_WIDTH = 40
 /** The least room a loader is drawn in. */

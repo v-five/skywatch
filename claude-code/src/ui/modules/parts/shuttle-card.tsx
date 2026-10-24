@@ -16,9 +16,8 @@ const NAME_MIN = 12
 const STATUS_EXTRAS = 12
 /** The loader's margins and the gap before the status. */
 const LOADER_EXTRAS = 6
-const HOTKEYS = 9
 
-type CardProps = { ui: UiContext; shuttle: Shuttle; index: number; bridgeModel: string; isViewed: boolean }
+type CardProps = { ui: UiContext; shuttle: Shuttle; bridgeModel: string; isViewed: boolean }
 
 function statusWord(shuttle: Shuttle): string {
   return shuttle.lastStop === MAX_TOKENS ? MAX_TOKENS : SHUTTLE_STATUS[shuttle.status].word
@@ -62,7 +61,6 @@ function ShuttleTitle(props: CardProps & { isFolded: boolean }): RenderNode {
           ui={ui}
           markKey={`shuttle-${shuttle.id}`}
           isFolded={isFolded}
-          {...(props.index < HOTKEYS ? { hotkey: String(props.index + 1) } : {})}
           onPress={() => ui.actions.toggleShuttle(shuttle.id, isInFlight)}
         />
       </Box>

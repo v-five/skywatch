@@ -100,7 +100,6 @@ The last directive that matches wins: SkyWatch's defaults come first, then your 
 | `/skywatch directives` | reload and list the directives |
 | `/skywatch palette` | list each surface's palette, the colours the palette files set, and lines they could not read |
 
-With the pane focused (`ctrl+x tab`): `1`–`9` fold or open a shuttle's card, `h` opens the Hangar, and a deck's letter (`s` shell, `w` web, `a` agents, `m` mcp, `o` other and so on) opens its latest checks.
 
 ## Settings
 

@@ -4,7 +4,7 @@ import { shieldsSummary, tallyTotal, ZERO_TALLY } from '../../domain'
 import type { ModuleProps, ModuleView, UiContext } from '../context'
 import { ModuleFrame } from '../frame'
 import { Row, Ruler, Sep } from '../layout'
-import { DECK_KEYS, FRAME_INSET, LABEL_WIDTH } from '../metrics'
+import { FRAME_INSET, LABEL_WIDTH } from '../metrics'
 import { VERDICT_STYLE } from '../theme'
 import { shareCells, Tally } from '../widgets'
 import { HeldCall } from './parts'
@@ -96,7 +96,7 @@ function Verdicts({ ui, data }: ModuleProps): RenderNode {
   )
 }
 
-/** A deck's button: its name, how many checks it holds, and its hotkey; pressed, it opens its latest checks. */
+/** A deck's button: its name and how many checks it holds; pressed, it opens its latest checks. */
 function DeckButton({ ui, deck, shields }: { ui: UiContext; deck: Deck; shields: Shields }): RenderNode {
   const { Button } = ui.els
   const count = tallyTotal(shields.totals[deck] ?? ZERO_TALLY)
@@ -104,7 +104,6 @@ function DeckButton({ ui, deck, shields }: { ui: UiContext; deck: Deck; shields:
     <Button
       key={`deck-${deck}`}
       plain
-      hotkey={DECK_KEYS[deck]}
       label={`${deck} ${count}${ui.view.deckOpen === deck ? ' ▾' : ''}`}
       dimColor={count === 0}
       onPress={() => ui.actions.toggleDeck(deck)}

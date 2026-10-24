@@ -78,7 +78,7 @@ skywatch/
                    mission.ts (recordUsage, readUsage, costNow, contextNow, addJumpTokens) · session.ts
                    (resetAll, loadTotals, saveTotals, followSession) · view.ts (paneActions)
       ui/          context.ts (DrawContext, UiContext, PaneData, ModuleView, uiContext) · palette.ts (presets) · theme.ts (status looks) ·
-                   metrics.ts (widths, hotkeys) · hazard.ts · layout.tsx (Row, RowBlock, Sep, Ruler, Blank, Stack,
+                   metrics.ts (widths) · hazard.ts · layout.tsx (Row, RowBlock, Sep, Ruler, Blank, Stack,
                    Border) · widgets.tsx (gaugeCells, Bar, Effort, Tally, Fold, LiveClock, Connector: the only Client
                    tags) · frame.tsx (ModuleFrame) · beacon.ts · viewscreen.tsx · pane.tsx · modules/ (index
                    MODULE_VIEWS, bridge, council, shields, shuttles, probes, mission, blackbox; parts/ index,
@@ -261,7 +261,7 @@ export function uiContext(pane: { els; surface; bodyColumns; now; usage; view; a
 
 - `palette.ts`: the presets (`paletteOf`), each eight hazard steps (`Space`) with the roles drawn from them (`Colors`); `parsePaletteFile` reads a palette file. The palette for a surface reaches every component through `DrawContext`/`UiContext` (`ui.colors`, `ui.space`), never through a module constant.
 - `theme.ts`: `VERDICT_STYLE` and `SHUTTLE_STATUS` name a role, not a colour; `entryColor` (writers in a `Map`).
-- `metrics.ts`: `DECK_KEYS`, `LABEL_WIDTH`, `GAUGE_WIDTH`, `FRAME_INSET`, `SEPARATOR`, `PANE_MIN_WIDTH`, `MIN_LOADER_ROOM`.
+- `metrics.ts`: `LABEL_WIDTH`, `GAUGE_WIDTH`, `FRAME_INSET`, `SEPARATOR`, `PANE_MIN_WIDTH`, `MIN_LOADER_ROOM`.
 - `hazard.ts`: `hazardOf` (coloured by a palette's space, SkyWatch's by default), `ringOf`.
 - `layout.tsx`: `Row`, `RowBlock`, `Sep`, `Ruler` (`isDashed`), `Blank`, `Stack` (`items`), `Border` (`borderColor`, `borderStyle`, `isBorderDim`).
 - `widgets.tsx`: `gaugeCells`, `Bar` and `Connector` (on a `DrawContext`), `Effort`, `Tally`, `Fold`, `LiveClock`. `LiveClock` and `Connector` hold the only `Client` tags: `./clients/clock.tsx`, `./clients/loader.tsx`.
@@ -372,7 +372,7 @@ export async function measure($: EngineInterface, risk: Risk, cwd: string): Prom
 
 - **Domain constants sit with the code that uses them**, named in `SCREAMING_SNAKE_CASE`: list caps in their reducer's file (`BLACKBOX_MAX = 200`, `SHUTTLES_MAX = 24`, `TRANSMISSIONS_MAX = 40`, `COUNCIL_IDS_MAX = 40`, `SEEN_MAX = 60`, `PROBES_MAX = 60`, `ROSTER_MAX = 20`, `UNFOLDED_MAX = 30`, `RECENT_CHECKS_MAX = 80`, `TOOL_NOTES_MAX = 3`, `HISTORY_MAX = 12`), thresholds (`COMPACTION_MIN_TOKENS = 20_000`, `PROBE_ACTIVE_MS = 15_000`, `COST_EPSILON = 0.005`), and every `shorten` width as a named constant in its file. A constant two layers share goes in the lower one (`BLACKBOX_PAGE` in `domain/blackbox.ts`). There is no `limits.ts`.
 - **Pane geometry** (`PANE_COLUMNS = 66`, `PANE_ROWS = 8`) is in `events/status.ts`; widths drawn by the UI (`LABEL_WIDTH = 12`, `GAUGE_WIDTH = 10`, `PANE_MIN_WIDTH = 40`, black box columns, loader widths) are in `ui/metrics.ts` or the module that uses them. The black box time column is `fmtClock(0).length + 1`.
-- **Colours**: `ui/palette.ts` holds the presets, each a `Space` of eight steps and the `Colors` roles drawn from it; `ui/theme.ts` holds the status tables, which name roles. `ui/hazard.ts` colours the scale from a palette's space (finding 24). Widths and hotkeys live in `ui/metrics.ts`. Nothing below `ui/` names a colour.
+- **Colours**: `ui/palette.ts` holds the presets, each a `Space` of eight steps and the `Colors` roles drawn from it; `ui/theme.ts` holds the status tables, which name roles. `ui/hazard.ts` colours the scale from a palette's space (finding 24). Widths live in `ui/metrics.ts`. Nothing below `ui/` names a colour.
 - **Types**: persisted shapes and their unions in `types/index.d.ts` only. Non-persisted types with their owner, exported from its barrel: `Config`, `Module` (`core/config.ts`); `UsageReading`, `StepUsage`, `PaneActions` (`domain/`); `Risk`, `Held`, `Measure`, `DirectiveSet` (`forcefield/`); `UiContext`, `PaneData` (`ui/context.ts`); `Runtime` (`events/runtime.ts`). Closed sets are `as const` arrays typed against the contract's union (`DECKS satisfies readonly Deck[]`).
 - **Guards instead of casts**: `isOneOf`, `isDeck`, `isHazardMode`, `handbackMessage(call: unknown): string | null` (finding 39), `serverBlocksOf(content: unknown): ServerBlock[]` for `session.append`. No `as unknown as`.
 

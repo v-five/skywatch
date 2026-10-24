@@ -11,18 +11,11 @@ export const FOLD_MARK_WIDTH = 2
 export type NotePart = { text: string; color?: string; isBold?: boolean; isDim?: boolean }
 
 /** The mark at a card's end that folds it to its title row and opens it again. */
-export function FoldMark(props: { ui: UiContext; markKey: string; isFolded: boolean; hotkey?: string; onPress: () => void }): RenderNode {
+export function FoldMark(props: { ui: UiContext; markKey: string; isFolded: boolean; onPress: () => void }): RenderNode {
   const { Box, Button } = props.ui.els
   return (
     <Box marginLeft={1} flexShrink={0}>
-      <Button
-        key={props.markKey}
-        plain
-        dimColor
-        {...(props.hotkey ? { hotkey: props.hotkey } : {})}
-        label={props.isFolded ? FOLD_MARK.closed : FOLD_MARK.open}
-        onPress={props.onPress}
-      />
+      <Button key={props.markKey} plain dimColor label={props.isFolded ? FOLD_MARK.closed : FOLD_MARK.open} onPress={props.onPress} />
     </Box>
   )
 }
