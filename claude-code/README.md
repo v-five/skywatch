@@ -50,7 +50,7 @@ How full the context window is. The band above the prompt, the header's radar `�
 | `⊹` Flight plan | the bridge's task list: each step done, in progress, pending or skipped (dropped before it was done), with progress in the title. Steps that share a name before `:` (`Fix findings: force field`, `Fix findings: domain`) form a phase; a finished phase folds to one line |
 | `⇡` a shuttle | one card per subagent, titled from its mission ("Implement the footer component" reads `Footer builder`): its Mission, its Brief (the prompt it was given), Helm (effort, type, model), Fuel with its flight time, Scanning or its Debrief once docked, and its last tool. A card in flight is open until you fold it; docked shuttles land in the Hangar, one line that opens to their folded cards |
 | `◌` Probes | model loops no shuttle claims, such as workflow agents |
-| `✧` Mission | the whole session: Fuel (tokens, cost, calls), Flight time, Power (5-hour and 7-day limits), the Jump running now and the Last jump |
+| `✧` Mission | the whole session: Fuel (tokens, cost and dollars an active hour, calls), Flight time, Power (5-hour and 7-day limits, with when they run out at this pace if that comes before the recharge), the Jump running now and the Last jump, and the jump's Errors |
 | `▣` Black box | what happened, newest first, ten at a time |
 
 A module's title row shows the loader while its work runs, and ends with a `▲` that folds the module to that row (`▼` opens it again). Long text folds to two lines with a `▼` on its last line to open it.

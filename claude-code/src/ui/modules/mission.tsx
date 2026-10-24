@@ -1,12 +1,12 @@
 import type { RenderNode } from 'claude-code'
 import type { RateLimit } from '../../../types'
-import { fmtAgo, fmtDuration, fmtResetIn, fmtUsd, kTokens, limitLabel, plural } from '../../core'
-import { activeTime } from '../../domain'
+import { capitalize, fmtAgo, fmtDuration, fmtResetIn, fmtUsd, kTokens, limitLabel, plural, relativePaths } from '../../core'
+import { activeTime, burnRate, powerRunsOutIn } from '../../domain'
 import type { ModuleProps, ModuleView, UiContext } from '../context'
 import { ModuleFrame } from '../frame'
-import { Row, Ruler, Sep } from '../layout'
-import { LABEL_WIDTH } from '../metrics'
-import { Bar, LiveClock } from '../widgets'
+import { Row, RowBlock, Ruler, Sep } from '../layout'
+import { FRAME_INSET, LABEL_WIDTH } from '../metrics'
+import { Bar, Fold, LiveClock } from '../widgets'
 
 const LIMITS_SHOWN = 2
 
@@ -14,10 +14,13 @@ const LIMITS_SHOWN = 2
 function PowerRow({ ui, limit }: { ui: UiContext; limit: RateLimit }): RenderNode {
   const { Text } = ui.els
   const resetIn = fmtResetIn(limit.resetsAt, ui.now)
+  const runsOutIn = powerRunsOutIn(limit, ui.now)
   return (
     <Row ui={ui} label={`Power ${limitLabel(limit.kind)}`}>
       <Bar ui={ui} pct={limit.pct} />
       <Text bold>{`  ${String(Math.round(limit.pct)).padStart(2)}%`}</Text>
+      {runsOutIn !== null ? <Sep ui={ui} /> : null}
+      {runsOutIn !== null ? <Text color={ui.colors.stopped}>{`runs out in ${fmtDuration(runsOutIn)} at this pace`}</Text> : null}
       {resetIn ? <Sep ui={ui} /> : null}
       {resetIn ? <Text dimColor>{`recharge in ${resetIn}`}</Text> : null}
     </Row>
@@ -28,12 +31,14 @@ function Totals({ ui, data }: ModuleProps): RenderNode {
   const { Box, Text } = ui.els
   const { totals, usage } = data
   const activeMs = activeTime(totals, data.jump, data.bridge.isRunning, ui.now)
+  const perHour = burnRate(usage.costUsd, activeMs)
   return (
     <Box flexDirection="column">
       <Row ui={ui} label="Fuel">
         <Text>{`↑${kTokens(totals.tokIn)}  ↓${kTokens(totals.tokOut)}`}</Text>
         {usage.costUsd !== null ? <Sep ui={ui} /> : null}
         {usage.costUsd !== null ? <Text bold>{fmtUsd(usage.costUsd)}</Text> : null}
+        {perHour !== null ? <Text dimColor>{` · ${fmtUsd(perHour)}/h`}</Text> : null}
         <Sep ui={ui} />
         <Text>{`${totals.req} calls`}</Text>
       </Row>
@@ -89,6 +94,25 @@ function Jumps({ ui, data }: ModuleProps): RenderNode | null {
   )
 }
 
+/** The errors of the jump running, or of the last one: what the error counts above are made of. */
+function ErrorTrail({ ui, data }: ModuleProps): RenderNode | null {
+  const since = data.jump.startedAt
+  const errors = since > 0 ? data.blackbox.filter(entry => entry.kind === 'error' && entry.at >= since) : []
+  if (errors.length === 0) return null
+  const text = errors.map(entry => `${capitalize(entry.who)}: ${entry.text}`).join('  ·  ')
+  return (
+    <RowBlock ui={ui} label="Errors">
+      <Fold
+        ui={ui}
+        foldKey={`errors-${since}`}
+        text={relativePaths(text, ui.places)}
+        width={ui.width - FRAME_INSET - LABEL_WIDTH}
+        color={ui.colors.alert}
+      />
+    </RowBlock>
+  )
+}
+
 /** The whole session and the account: fuel, flight time, power, then the jump running and the last one. */
 function MissionModule(props: ModuleProps): RenderNode {
   const { ui, data } = props
@@ -97,6 +121,7 @@ function MissionModule(props: ModuleProps): RenderNode {
     <ModuleFrame ui={ui} foldKey="mission" title="✧ Mission" color={ui.colors.dim}>
       <Totals {...props} />
       <Jumps {...props} />
+      <ErrorTrail {...props} />
       {data.jump.isReviewing ? <Text color={ui.colors.council}>{'architect reviewing before done (inferred)'}</Text> : null}
     </ModuleFrame>
   )

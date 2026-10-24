@@ -23,6 +23,20 @@ describe('tool calls', () => {
     await ui.unmount()
   })
 
+  test('the errors of the jump unfold under the mission', async ($, on) => {
+    world(on)
+    runTools(on, isFalse)
+    on('turn.start', (_, e) => ({ turnId: e.turnId }))
+    await $.session.start(START)
+    await $.turn.start({ text: 'go', turnId: 'j1' })
+    await $.tool.call({ tool: 'Bash', command: 'false one' })
+    await $.tool.call({ tool: 'Bash', command: 'false two' })
+    const ui = await $.ui.mount(paneRequest())
+    expect(await ui.find({ type: 'Text', text: 'Errors' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /^Bridge: Bash → false one {2}✗ {2}· {2}Bridge: Bash → false two/ })).toBeDefined()
+    await ui.unmount()
+  })
+
   test('a shuttle keeps its last tools; the card shows the one before the latest', async ($, on) => {
     world(on)
     runTools(on)

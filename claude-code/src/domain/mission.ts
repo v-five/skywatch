@@ -1,4 +1,5 @@
 import type { Jump, LastJump, LineCost, SessionTotals } from '../../types'
+import { SECOND_MS } from '../core'
 import { DEFAULT_JUMP, DEFAULT_TOTALS } from './defaults'
 
 const COST_EPSILON = 0.005
@@ -92,4 +93,28 @@ export function withPromptAt(jump: Jump, promptAt: number): Jump {
 /** While the council reviews before done, the mission says so. */
 export function withReviewing(jump: Jump, isReviewing: boolean): Jump {
   return { ...jump, isReviewing }
+}
+
+const HOUR_MS = 60 * 60 * SECOND_MS
+/** How long each rate-limit window runs, by its kind; another kind has no forecast. */
+const LIMIT_WINDOW_MS: ReadonlyMap<string, number> = new Map([
+  ['five_hour', 5 * HOUR_MS],
+  ['seven_day', 7 * 24 * HOUR_MS],
+])
+/** A forecast needs this much of the window behind it, or the rate is noise. */
+const FORECAST_MIN_ELAPSED_MS = 10 * 60 * SECOND_MS
+
+/** When a rate limit runs out at the pace so far in its window, in ms from now; null when it lasts to its recharge. */
+export function powerRunsOutIn(limit: { kind: string; pct: number; resetsAt?: number | null }, now: number): number | null {
+  const windowMs = LIMIT_WINDOW_MS.get(limit.kind)
+  if (!windowMs || !limit.resetsAt || limit.pct <= 0) return null
+  const elapsed = now - (limit.resetsAt - windowMs)
+  if (elapsed < FORECAST_MIN_ELAPSED_MS) return null
+  const left = ((100 - limit.pct) / limit.pct) * elapsed
+  return now + left < limit.resetsAt ? Math.max(0, left) : null
+}
+
+/** Dollars an active hour, or null before an hour's worth of minutes or without a cost. */
+export function burnRate(costUsd: number | null, activeMs: number): number | null {
+  return costUsd !== null && activeMs >= FORECAST_MIN_ELAPSED_MS ? (costUsd / activeMs) * HOUR_MS : null
 }

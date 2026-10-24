@@ -3,6 +3,7 @@ import {
   activeTime,
   afterCall,
   avgSpeed,
+  burnRate,
   compactionOf,
   DEFAULT_AVG,
   DEFAULT_TOTALS,
@@ -10,6 +11,7 @@ import {
   jumpCost,
   lastDelta,
   lastJumpOf,
+  powerRunsOutIn,
   startJump,
   stepSpeed,
   stepTokens,
@@ -77,5 +79,22 @@ describe('jumps and totals', () => {
     const totals = withRequestTokens(DEFAULT_TOTALS, { tokIn: 4, tokOut: 2 })
     expect(totals).toMatchObject({ tokIn: 4, tokOut: 2, req: 1 })
     expect(activeTime({ ...totals, activeMs: 100 }, startJump(1000, null), true, 1500)).toBe(600)
+  })
+})
+
+describe('forecasts', () => {
+  const HOUR = 3_600_000
+  test('power runs out before its recharge at the pace so far, or lasts', () => {
+    const now = 10 * HOUR
+    // Two hours into a five-hour window at 50%: two more hours to run out, three until the recharge.
+    expect(powerRunsOutIn({ kind: 'five_hour', pct: 50, resetsAt: now + 3 * HOUR }, now)).toBe(2 * HOUR)
+    expect(powerRunsOutIn({ kind: 'five_hour', pct: 10, resetsAt: now + 3 * HOUR }, now)).toBeNull()
+    expect(powerRunsOutIn({ kind: 'other', pct: 90, resetsAt: now + HOUR }, now)).toBeNull()
+  })
+
+  test('dollars an active hour, once there is enough to tell', () => {
+    expect(burnRate(5, 2 * HOUR)).toBe(2.5)
+    expect(burnRate(5, 60_000)).toBeNull()
+    expect(burnRate(null, HOUR)).toBeNull()
   })
 })
