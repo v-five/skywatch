@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'claude-code/testing'
-import { complete, paneRequest, START, skywatch, slashCommand } from '../support/drive'
+import { complete, paneRequest, START, skywatch, slashCommand, spawn } from '../support/drive'
 import { HOME, PROJECT_DIRECTIVES, world } from '../support/world'
 
 const DIRECTIVES_REPORT = [
@@ -33,7 +33,7 @@ describe('/skywatch', () => {
     expect(await $.command.run(skywatch('dock'))).toMatchObject({ text: 'SkyWatch docked.' })
     expect(await $.command.run(skywatch('recalibrate'))).toMatchObject({ text: 'SkyWatch recalibrated.' })
     expect(await $.command.run(skywatch('warp'))).toMatchObject({
-      text: 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives|palette]',
+      text: 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives|palette|debrief]',
     })
   })
 
@@ -120,5 +120,18 @@ describe('other slash commands', () => {
     await $.turn.start({ text: 'go', turnId: 'j1' })
     await $.turn.complete(complete('done'))
     expect(compactions).toHaveLength(1)
+  })
+
+  test('/skywatch debrief writes the session as markdown', async ($, on) => {
+    world(on, { run: argv => (argv[0] === 'git' ? { exitCode: 0, stdout: '3\t1\tsrc/a.ts\n' } : undefined) })
+    on('agent.spawn', () => ({ model: 'm', agentId: 's1' }))
+    on('turn.complete', () => ({ text: '' }))
+    await $.session.start(START)
+    await $.agent.spawn(spawn('Explore', 'scan the repo'))
+    await $.turn.complete(complete('All clear.', { agentId: 's1' }))
+    const { text } = await $.command.run(skywatch('debrief'))
+    expect(text).toContain('# Mission debrief')
+    expect(text).toContain('- Repo scout (Explore): docked')
+    expect(text).toContain('- Changes: 1 file, +3 −1, not committed')
   })
 })

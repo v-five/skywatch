@@ -104,6 +104,7 @@ The last directive that matches wins: SkyWatch's defaults come first, then your 
 | `/skywatch recalibrate` | clear the shuttles, checks, transmissions, the black box and the jump; fuel, power and compactions stay |
 | `/skywatch hazards viewscreen\|beacon\|off` | change the hazard scale for this session; without a value, show it |
 | `/skywatch directives` | reload and list the directives |
+| `/skywatch debrief` | the session as markdown, to keep or paste into a pull request: fuel, the flight plan, the shuttles, the shields and the cargo |
 | `/skywatch palette` | list each surface's palette, the colours the palette files set, and lines they could not read |
 
 

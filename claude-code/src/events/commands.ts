@@ -1,13 +1,25 @@
 import type { EngineInterface, On } from 'claude-code'
 import { isHazardMode } from '../core'
-import { withCommand, withHazards } from '../domain'
+import { activeTime, debriefText, withCommand, withHazards } from '../domain'
 import { directivesReport, loadDirectives } from '../forcefield'
-import { patchBridge, patchView, resetAll } from '../state'
+import {
+  getBlackbox,
+  getBridge,
+  getJump,
+  getShields,
+  getShuttles,
+  getStation,
+  getTotals,
+  getUsage,
+  patchBridge,
+  patchView,
+  resetAll,
+} from '../state'
 import { paletteReport } from './palette'
 import type { Runtime } from './runtime'
 import { hazardsNow, openPane, PANE_ID, refreshStatus, remeasure } from './status'
 
-const USAGE = 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives|palette]'
+const USAGE = 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives|palette|debrief]'
 const HAZARDS_USAGE = 'Usage: /skywatch hazards viewscreen|beacon|off'
 const LAUNCHED = 'SkyWatch launched.'
 
@@ -19,6 +31,31 @@ async function runHazards($: EngineInterface, runtime: Runtime, mode: string): P
   await refreshStatus($, runtime)
   $.ui.invalidate('ui.render')
   return `Hazards: ${mode}, for this session.`
+}
+
+/** `/skywatch debrief`: the session as markdown, to keep or paste into a pull request. */
+async function readDebrief($: EngineInterface): Promise<string> {
+  const [totals, usage, jump, bridge, fleet, shields, station, blackbox, now] = await Promise.all([
+    getTotals($),
+    getUsage($),
+    getJump($),
+    getBridge($),
+    getShuttles($),
+    getShields($),
+    getStation($),
+    getBlackbox($),
+    $.clock.now(),
+  ])
+  return debriefText({
+    totals,
+    usage,
+    activeMs: activeTime(totals, jump, bridge.isRunning, now),
+    plan: bridge.planSteps ?? [],
+    fleet,
+    shields,
+    station,
+    errors: blackbox.filter(entry => entry.kind === 'error').length,
+  })
 }
 
 async function launch($: EngineInterface): Promise<string> {
@@ -41,6 +78,8 @@ async function runSkywatch($: EngineInterface, runtime: Runtime, args: string): 
       return 'SkyWatch recalibrated.'
     case 'hazards':
       return runHazards($, runtime, argument)
+    case 'debrief':
+      return readDebrief($)
     case 'palette':
       return paletteReport(runtime.config.palette, runtime.paletteFiles)
     case 'directives':
