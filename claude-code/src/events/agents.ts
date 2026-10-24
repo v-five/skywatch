@@ -10,6 +10,7 @@ import {
   logEntry,
   markSeen,
   noteMode,
+  noteUsed,
   patchProbes,
   patchShuttles,
   startTransmission,
@@ -41,6 +42,7 @@ async function launchAgent(
     spawnedAt: await $.clock.now(),
   })
   await patchShuttles($, fleet => addShuttle(fleet, shuttle))
+  await noteUsed($, `agent:${e.subagentType}`)
   await patchProbes($, probes => dropProbe(probes, id))
   await logEntry($, shuttleWriter(shuttle), `spawned · ${shuttle.type}`, 'info', id)
   await refreshStatus($, runtime)

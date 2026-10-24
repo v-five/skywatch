@@ -16,11 +16,24 @@ import {
   noteTool,
   recordCheck,
   settleCheck,
+  usedKeyOf,
   WRITERS,
   withShuttle,
 } from '../domain'
 import { gateVerdict, type Held, holdFor } from '../forcefield'
-import { getCouncil, getJump, getShields, logEntry, noteAdvice, noteCall, patchJump, patchShields, patchShuttles, whoIs } from '../state'
+import {
+  getCouncil,
+  getJump,
+  getShields,
+  logEntry,
+  noteAdvice,
+  noteCall,
+  noteUsed,
+  patchJump,
+  patchShields,
+  patchShuttles,
+  whoIs,
+} from '../state'
 import type { Runtime } from './runtime'
 import { refreshStatus } from './status'
 
@@ -157,6 +170,8 @@ export function registerTools(on: On, runtime: Runtime): void {
 
   on('tool.call', async ($, e, next) => {
     if (String(e.tool) !== HANDBACK_TOOL) await bestEffort(noteCall($, e.agentId, { tool: e.tool, input: e, places: runtime.places }))
+    const usedKey = usedKeyOf(e.tool, e)
+    if (usedKey) await bestEffort(noteUsed($, usedKey))
     await bestEffort(holdCall($, runtime, e))
     let ran: CallResult | undefined
     try {

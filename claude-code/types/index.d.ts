@@ -57,7 +57,21 @@ export type Usage = {
   lastCompactAt: number | null
   /** Context tokens after each recent jump, oldest first. */
   history: number[]
+  /** What fills the context, as Claude Code's local estimate breaks it down; empty before one. */
+  layers?: Layer[]
+  /** The context size at which auto-compaction runs; null when it is off or unknown. */
+  compactAt?: number | null
+  /** Loaded into the context but not used this session, heaviest first. */
+  ballast?: Ballast[]
+  /** What this session has used, as `mcp:<server>`, `skill:<name>` or `agent:<type>`. */
+  used?: string[]
 }
+
+/** One part of the context: its name, its tokens, its kind and the theme colour Claude Code draws it in. */
+export type Layer = { name: string; tokens: number; kind: 'used' | 'free' | 'buffer'; color: string }
+
+/** Something loaded into the context and not used: an MCP server, a skill or an agent. */
+export type Ballast = { key: string; name: string; tokens: number }
 
 export type Transmission = { id: string; at: number; endAt: number | null; moment: Moment; via: string }
 

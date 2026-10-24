@@ -9,7 +9,15 @@ export const HOME = '/home/captain'
 
 export type RunAnswer = { exitCode: number; stdout: string }
 /** `tokens` and `percent` are absent before a response counts the window (a fresh or just-compacted one); `estimated` answers a breakdown. */
-export type UsageAnswer = { percent?: number; tokens?: number; window: number; usd: number; estimated?: number }
+export type UsageAnswer = {
+  percent?: number
+  tokens?: number
+  window: number
+  usd: number
+  estimated?: number
+  /** The breakdown's rows and loaded MCP tools, and where auto-compaction runs; any of them makes a breakdown answer. */
+  manifest?: Partial<Pick<SessionContextBreakdown, 'categories' | 'mcpTools' | 'agents' | 'autoCompactThreshold'>>
+}
 
 export type WorldOptions = {
   now?: number
@@ -67,7 +75,9 @@ function counted(usage: UsageAnswer): Pick<SessionContextUsage, 'percent' | 'tok
 }
 
 /** A breakdown that only totals: what the mod reads of an estimate. */
-function estimatedBreakdown(totalTokens: number, window: number): SessionContextBreakdown {
+function estimatedBreakdown(usage: UsageAnswer): SessionContextBreakdown {
+  const totalTokens = usage.estimated ?? usage.tokens ?? 0
+  const { window } = usage
   return {
     categories: [],
     totalTokens,
@@ -82,6 +92,7 @@ function estimatedBreakdown(totalTokens: number, window: number): SessionContext
     agents: [],
     isAutoCompactEnabled: true,
     apiUsage: null,
+    ...usage.manifest,
   }
 }
 
@@ -106,7 +117,8 @@ export function world(on: On, options: WorldOptions = {}): MockClock {
   on('session.usage', (_, e) => {
     if (!usage) throw new Error('no usage on this host')
     const resetsAt = new Date(NOW + 3_600_000).toISOString()
-    const breakdown = e?.breakdown && usage.estimated !== undefined ? { breakdown: estimatedBreakdown(usage.estimated, usage.window) } : {}
+    const hasBreakdown = usage.estimated !== undefined || usage.manifest !== undefined
+    const breakdown = e?.breakdown && hasBreakdown ? { breakdown: estimatedBreakdown(usage) } : {}
     return {
       value: {
         startedAt: NOW,

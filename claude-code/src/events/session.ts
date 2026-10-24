@@ -1,7 +1,7 @@
 import type { EngineInterface, On } from 'claude-code'
 import { usageFrom, withCommand } from '../domain'
 import { homeFolder, loadDirectives } from '../forcefield'
-import { loadTotals, migrateState, patchBridge, patchUsage, readUsage, recordUsage, resetAll } from '../state'
+import { loadTotals, migrateState, patchBridge, patchUsage, readUsage, recordManifest, recordUsage, resetAll } from '../state'
 import { loadPaletteFiles } from './palette'
 import type { Runtime } from './runtime'
 import { openPane, refreshStatus, remeasure } from './status'
@@ -21,6 +21,7 @@ async function startSession($: EngineInterface, runtime: Runtime): Promise<void>
   await patchBridge($, bridge => withCommand(bridge, null))
   const reading = await readUsage($)
   if (reading) await patchUsage($, usage => usageFrom(usage, reading))
+  await recordManifest($).catch(() => undefined)
   await loadTotals($).catch(() => undefined)
   if (runtime.config.autoLaunch) void openPane($).catch(() => undefined)
   await refreshStatus($, runtime)
@@ -49,7 +50,10 @@ export function registerSession(on: On, runtime: Runtime): void {
 
   on('session.measure', async ($, e, next) => {
     await recordUsage($, e)
-    if (e.changed.includes('context')) await refreshStatus($, runtime)
+    if (e.changed.includes('context')) {
+      await recordManifest($).catch(() => undefined)
+      await refreshStatus($, runtime)
+    }
     return next(e)
   })
 }

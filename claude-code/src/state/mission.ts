@@ -10,7 +10,9 @@ import {
   withCompaction,
   withEstimatedContext,
   withJumpTokens,
+  withManifest,
   withRequestTokens,
+  withUsed,
 } from '../domain'
 import { getUsage, patchJump, patchTotals, patchUsage } from './atoms'
 import { logEntry } from './log'
@@ -55,4 +57,16 @@ export async function addJumpTokens($: EngineInterface, usage: StepUsage): Promi
   if (tokens.tokIn === 0 && tokens.tokOut === 0) return
   await patchJump($, jump => withJumpTokens(jump, tokens))
   await patchTotals($, totals => withRequestTokens(totals, tokens))
+}
+
+/** What fills the context, from Claude Code's local estimate: free, and sent nowhere. */
+export async function recordManifest($: EngineInterface): Promise<void> {
+  const reading = await $.session.usage({ breakdown: 'summary' }).catch(() => null)
+  const breakdown = reading?.context.breakdown
+  if (breakdown) await patchUsage($, usage => withManifest(usage, breakdown))
+}
+
+/** Something the context carries was used: it is ballast no more. */
+export async function noteUsed($: EngineInterface, key: string): Promise<void> {
+  await patchUsage($, usage => withUsed(usage, key))
 }

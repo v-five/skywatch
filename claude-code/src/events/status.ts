@@ -1,7 +1,7 @@
 import type { EngineInterface, UiOpenResult } from 'claude-code'
 import type { HazardMode } from '../../types'
 import { effectiveHazards } from '../domain'
-import { getCouncil, getShields, getShuttles, getUsage, getView, readUsage, recordUsage } from '../state'
+import { getCouncil, getShields, getShuttles, getUsage, getView, readUsage, recordManifest, recordUsage } from '../state'
 import { beaconText } from '../ui'
 import type { Runtime } from './runtime'
 
@@ -36,6 +36,7 @@ export async function refreshStatus($: EngineInterface, runtime: Runtime): Promi
 export async function remeasure($: EngineInterface, runtime: Runtime): Promise<void> {
   const reading = await readUsage($)
   if (reading) await recordUsage($, reading)
+  await recordManifest($).catch(() => undefined)
   await refreshStatus($, runtime)
   $.ui.invalidate('ui.render')
 }

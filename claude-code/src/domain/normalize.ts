@@ -1,4 +1,5 @@
 import type {
+  Ballast,
   BlackboxEntry,
   Bridge,
   Check,
@@ -7,6 +8,7 @@ import type {
   EntryKind,
   Jump,
   LastJump,
+  Layer,
   Meta,
   PlanStatus,
   PlanStep,
@@ -80,6 +82,22 @@ export function normalizeBridge(stored: unknown): Bridge {
   }
 }
 
+const LAYER_KINDS = ['used', 'free', 'buffer'] as const
+
+function isLayer(value: unknown): value is Layer {
+  return (
+    isRecord(value) &&
+    typeof value.name === 'string' &&
+    isNumber(value.tokens) &&
+    isOneOf(LAYER_KINDS, value.kind) &&
+    typeof value.color === 'string'
+  )
+}
+
+function isBallast(value: unknown): value is Ballast {
+  return isRecord(value) && typeof value.key === 'string' && typeof value.name === 'string' && isNumber(value.tokens)
+}
+
 export function normalizeUsage(stored: unknown): Usage {
   const usage = mergeDefaults(DEFAULT_USAGE, stored, { pct: isNumber, tokens: isNumber, costUsd: isNumber, lastCompactAt: isNumber })
   return {
@@ -88,6 +106,10 @@ export function normalizeUsage(stored: unknown): Usage {
       .filter(isRecord)
       .map(limit => mergeDefaults(DEFAULT_LIMIT, limit)),
     history: listOf(usage.history).filter(isNumber),
+    layers: listOf(usage.layers).filter(isLayer),
+    compactAt: isNumber(usage.compactAt) ? usage.compactAt : null,
+    ballast: listOf(usage.ballast).filter(isBallast),
+    used: listOf(usage.used).filter(isString),
   }
 }
 

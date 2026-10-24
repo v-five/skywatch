@@ -50,6 +50,10 @@ export const DEFAULT_USAGE: Usage = {
   compactions: 0,
   lastCompactAt: null,
   history: [],
+  layers: [],
+  compactAt: null,
+  ballast: [],
+  used: [],
 }
 
 export const DEFAULT_COUNCIL: Council = { transmissions: [], ids: [], seen: [], lastAdvice: '' }

@@ -5,7 +5,7 @@ import type { ModuleProps, ModuleView } from '../context'
 import { ModuleFrame } from '../frame'
 import { Row, Ruler, Sep } from '../layout'
 import { Bar, Effort } from '../widgets'
-import { FlightPaths } from './parts'
+import { Ballast, FlightPaths, Manifest } from './parts'
 
 /** The state glyph is wider than a cell on some surfaces. */
 const STATE_SLACK = 1
@@ -35,6 +35,10 @@ function Hull({ ui, data }: ModuleProps): RenderNode {
       <Text>{usage.tokens !== null && usage.window ? `${kTokens(tokens)} / ${kTokens(usage.window)}` : kTokens(tokens)}</Text>
       <Sep ui={ui} />
       <Text>{`${bridge.steps} calls`}</Text>
+      {usage.compactAt && usage.tokens !== null && usage.compactAt > usage.tokens ? <Sep ui={ui} /> : null}
+      {usage.compactAt && usage.tokens !== null && usage.compactAt > usage.tokens ? (
+        <Text dimColor>{`compacts in ${kTokens(usage.compactAt - usage.tokens)}`}</Text>
+      ) : null}
       {usage.compactions ? <Text color={ui.colors.waiting}>{`  ⟲${usage.compactions}`}</Text> : null}
     </Row>
   )
@@ -118,6 +122,8 @@ function BridgeModule(props: ModuleProps): RenderNode {
     >
       <Helm {...props} />
       <Hull {...props} />
+      <Manifest {...props} />
+      <Ballast {...props} />
       <Warp {...props} />
       <Scanning {...props} />
       <Fleet {...props} />
