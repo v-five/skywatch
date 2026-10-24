@@ -11,6 +11,9 @@ describe('distress', () => {
     expect(distressOf({ ...calm, jump: { ...DEFAULT_JUMP, editsByFile: { 'src/a.ts': 6, 'src/b.ts': 1 } } })).toBe(
       'src/a.ts edited 6 times this jump',
     )
+    expect(distressOf({ ...calm, jump: { ...DEFAULT_JUMP, editsByFile: { 'src/\u001b[31ma.ts': 6 } } })).toBe(
+      'src/a.ts edited 6 times this jump',
+    )
     const asked = recordCheck(DEFAULT_SHIELDS, {
       id: 'c',
       tool: 'Bash',
