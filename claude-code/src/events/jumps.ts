@@ -114,7 +114,9 @@ async function completeBridgeJump($: EngineInterface, runtime: Runtime, e: Args<
 
 async function completeShuttle($: EngineInterface, e: Args<'turn.complete'>, shuttle: Shuttle, now: number): Promise<void> {
   const status = statusOf(e.reason)
-  await patchShuttles($, fleet => withShuttle(fleet, shuttle.id, each => landShuttle(each, { status, at: now, answer: e.answer })))
+  await patchShuttles($, fleet =>
+    withShuttle(fleet, shuttle.id, each => landShuttle(each, { status, at: now, answer: e.answer, reason: e.reason })),
+  )
   const text = status === 'done' ? `done · ${fmtDuration(now - shuttle.spawnedAt)}` : status
   await logEntry($, await whoIs($, shuttle.id), text, status === 'done' ? 'done' : 'error', shuttle.id)
 }

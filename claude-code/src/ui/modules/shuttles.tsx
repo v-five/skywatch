@@ -34,7 +34,13 @@ function ShuttlesModule({ ui, data }: ModuleProps): RenderNode {
   const landed = shown.filter(shuttle => shuttle.status !== 'running')
   const cards = (list: readonly Shuttle[]) =>
     list.map(shuttle => (
-      <ShuttleCard ui={ui} shuttle={shuttle} bridgeModel={data.bridge.model} isViewed={data.viewedAgentId === shuttle.id} />
+      <ShuttleCard
+        ui={ui}
+        shuttle={shuttle}
+        bridgeModel={data.bridge.model}
+        isViewed={data.viewedAgentId === shuttle.id}
+        sessionTokens={data.totals.tokIn + data.totals.tokOut}
+      />
     ))
   return (
     <Stack

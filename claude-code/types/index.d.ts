@@ -105,6 +105,10 @@ export type Shuttle = {
   ctx: number
   /** Output tokens summed over its steps. */
   out: number
+  /** Input and output tokens summed over its steps: what it burned, for its share of the session. */
+  fuel?: number
+  /** Why its last turn ended (`answer`, `aborted`, `refusal`, `error`); empty while it flies. */
+  endReason?: string
   steps: number
   lastStop: string | null
   tools: ToolNote[]

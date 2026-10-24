@@ -46,6 +46,7 @@ export function applyStep(shuttle: Shuttle, step: { model: string; usage: StepUs
     steps: shuttle.steps + 1,
     ctx: tokens.tokIn > 0 ? tokens.tokIn : shuttle.ctx,
     out: shuttle.out + tokens.tokOut,
+    fuel: (shuttle.fuel ?? 0) + tokens.tokIn + tokens.tokOut,
     lastStop: step.stopReason,
   }
 }
@@ -73,15 +74,45 @@ export function statusOf(reason: TurnCompleteReason): ShuttleStatus {
   return STATUS_OF[reason] ?? 'failed'
 }
 
-export function landShuttle(shuttle: Shuttle, landing: { status: ShuttleStatus; at: number; answer: string }): Shuttle {
+export function landShuttle(shuttle: Shuttle, landing: { status: ShuttleStatus; at: number; answer: string; reason?: string }): Shuttle {
   return {
     ...shuttle,
     status: landing.status,
+    endReason: landing.reason ?? '',
     endedAt: landing.at,
     doing: null,
     doingTitle: null,
     answer: shorten(landing.answer, ANSWER_MAX),
   }
+}
+
+const MAX_TOKENS = 'max_tokens'
+const LOST_BECAUSE: ReadonlyMap<string, string> = new Map([
+  ['aborted', 'stopped before it answered'],
+  ['refusal', 'the model refused'],
+  ['error', 'an API error ended it'],
+])
+
+/** Why a shuttle did not dock: its last stop or how its turn ended; null for one that docked or still flies. */
+export function lostReason(shuttle: Shuttle): string | null {
+  if (shuttle.lastStop === MAX_TOKENS) return 'it ran out of output tokens'
+  if (shuttle.status === 'running' || shuttle.status === 'done') return null
+  return LOST_BECAUSE.get(shuttle.endReason ?? '') ?? (shuttle.endReason ? `it ended: ${shuttle.endReason}` : 'it ended without an answer')
+}
+
+const MARKDOWN = /\*\*|__|`|^#+\s*|^>\s*/gm
+
+/** A report as a line of prose: markdown's bold, code and heading marks dropped, lines joined. */
+export function plainReport(answer: string): string {
+  return answer
+    .replace(MARKDOWN, '')
+    .replace(/\s*\n\s*/g, ' ')
+    .trim()
+}
+
+/** A shuttle's share of what the session burned, 0 to 100; null before the session has burned anything. */
+export function fuelShare(shuttle: Shuttle, sessionTokens: number): number | null {
+  return sessionTokens > 0 ? Math.min(100, ((shuttle.fuel ?? 0) / sessionTokens) * 100) : null
 }
 
 /** A shuttle's short name: the one it launched with, or made now for one stored before titles. */

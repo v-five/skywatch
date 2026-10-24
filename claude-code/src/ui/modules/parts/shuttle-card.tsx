@@ -1,13 +1,13 @@
 import type { RenderNode } from 'claude-code'
 import type { Shuttle } from '../../../../types'
 import { capitalize, kTokens, prettyModel, printable, relativePaths, shorten } from '../../../core'
-import { isEffort, titleOf } from '../../../domain'
+import { fuelShare, isEffort, lostReason, plainReport, titleOf } from '../../../domain'
 import type { UiContext } from '../../context'
 import { FOLD_MARK_WIDTH, FoldMark } from '../../frame'
 import { Blank, Border, Row, RowBlock, Ruler, Sep } from '../../layout'
-import { FRAME_INSET, LABEL_WIDTH, MIN_LOADER_ROOM } from '../../metrics'
+import { FRAME_INSET, GAUGE_WIDTH, LABEL_WIDTH, MIN_LOADER_ROOM } from '../../metrics'
 import { SHUTTLE_STATUS } from '../../theme'
-import { Connector, Effort, Fold, LiveClock } from '../../widgets'
+import { Connector, Effort, Fold, gaugeCells, LiveClock } from '../../widgets'
 
 const MAX_TOKENS = 'max_tokens'
 const SHUTTLE_ICON = '⇡'
@@ -17,7 +17,7 @@ const STATUS_EXTRAS = 12
 /** The loader's margins and the gap before the status. */
 const LOADER_EXTRAS = 6
 
-type CardProps = { ui: UiContext; shuttle: Shuttle; bridgeModel: string; isViewed: boolean }
+type CardProps = { ui: UiContext; shuttle: Shuttle; bridgeModel: string; isViewed: boolean; sessionTokens: number }
 
 function statusWord(shuttle: Shuttle): string {
   return shuttle.lastStop === MAX_TOKENS ? MAX_TOKENS : SHUTTLE_STATUS[shuttle.status].word
@@ -90,9 +90,11 @@ function CardMission({ ui, shuttle }: CardProps): RenderNode | null {
   )
 }
 
-/** Helm and Fuel, with the shuttle's clock beside them. */
-function CardGauges({ ui, shuttle, bridgeModel }: CardProps): RenderNode {
+/** Helm and Fuel, with the shuttle's share of the session's fuel and its clock beside them. */
+function CardGauges({ ui, shuttle, bridgeModel, sessionTokens }: CardProps): RenderNode {
   const { Box, Text } = ui.els
+  const share = fuelShare(shuttle, sessionTokens)
+  const cells = share === null ? null : gaugeCells(share, GAUGE_WIDTH)
   return (
     <Box flexDirection="column">
       <Row ui={ui} label="Helm">
@@ -101,6 +103,10 @@ function CardGauges({ ui, shuttle, bridgeModel }: CardProps): RenderNode {
       </Row>
       <Box justifyContent="space-between">
         <Row ui={ui} label="Fuel">
+          {cells ? <Text color={ui.colors.shuttles}>{cells.on}</Text> : null}
+          {cells ? <Text color={ui.colors.faint}>{cells.off}</Text> : null}
+          {share !== null ? <Text bold>{`  ${Math.round(share)}%`}</Text> : null}
+          {share !== null ? <Sep ui={ui} /> : null}
           <Text>{`↑${kTokens(shuttle.ctx)}  ↓${kTokens(shuttle.out)}`}</Text>
           <Sep ui={ui} />
           <Text>{`${shuttle.steps} calls`}</Text>
@@ -121,23 +127,31 @@ function CardGauges({ ui, shuttle, bridgeModel }: CardProps): RenderNode {
 
 /** What the shuttle is Scanning while it flies, or its Debrief once docked. */
 function CardReading({ ui, shuttle }: CardProps): RenderNode {
-  const { Text } = ui.els
+  const { Box, Text } = ui.els
   const reading = shuttle.task || shuttle.doingTitle || null
+  const lost = lostReason(shuttle)
   if (shuttle.status !== 'running') {
     return (
-      <RowBlock ui={ui} label="Debrief">
-        {shuttle.answer ? (
-          <Fold
-            ui={ui}
-            foldKey={`answer-${shuttle.id}`}
-            text={relativePaths(shuttle.answer, ui.places)}
-            width={ui.width - FRAME_INSET - LABEL_WIDTH}
-            color={ui.colors.text}
-          />
-        ) : (
-          <Text dimColor>no report</Text>
-        )}
-      </RowBlock>
+      <Box flexDirection="column">
+        {lost ? (
+          <Row ui={ui} label="Lost">
+            <Text color={ui.colors.alert}>{lost}</Text>
+          </Row>
+        ) : null}
+        <RowBlock ui={ui} label="Debrief">
+          {shuttle.answer ? (
+            <Fold
+              ui={ui}
+              foldKey={`answer-${shuttle.id}`}
+              text={relativePaths(plainReport(shuttle.answer), ui.places)}
+              width={ui.width - FRAME_INSET - LABEL_WIDTH}
+              color={ui.colors.text}
+            />
+          ) : (
+            <Text dimColor>no report</Text>
+          )}
+        </RowBlock>
+      </Box>
     )
   }
   return (

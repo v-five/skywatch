@@ -103,6 +103,8 @@ export const DEFAULT_SHUTTLE: Shuttle = {
   endedAt: null,
   ctx: 0,
   out: 0,
+  fuel: 0,
+  endReason: '',
   steps: 0,
   lastStop: null,
   tools: [],

@@ -5,10 +5,13 @@ import {
   applyStep,
   dropProbe,
   endProbe,
+  fuelShare,
   isProbeActive,
   landShuttle,
+  lostReason,
   newShuttle,
   noteTool,
+  plainReport,
   shownShuttles,
   shuttleTitle,
   statusOf,
@@ -104,5 +107,23 @@ describe('probes', () => {
     expect(probe && isProbeActive(probe, 20_000)).toBe(false)
     expect(endProbe(probes, 'p', 3000)[0]?.isDone).toBe(true)
     expect(dropProbe(probes, 'p')).toEqual([])
+  })
+})
+
+describe('a shuttle landed', () => {
+  test('one that did not dock says why', () => {
+    const flying = shuttle('s')
+    expect(lostReason(flying)).toBeNull()
+    expect(lostReason(landShuttle(flying, { status: 'failed', at: 2, answer: '', reason: 'error' }))).toBe('an API error ended it')
+    expect(lostReason(landShuttle(flying, { status: 'stopped', at: 2, answer: '', reason: 'aborted' }))).toBe('stopped before it answered')
+    expect(lostReason({ ...flying, lastStop: 'max_tokens' })).toBe('it ran out of output tokens')
+    expect(lostReason(landShuttle(flying, { status: 'done', at: 2, answer: 'ok', reason: 'answer' }))).toBeNull()
+  })
+
+  test('its share of the session, and its report as prose', () => {
+    const step = { model: 'm', usage: { input_tokens: 30, output_tokens: 20 }, stopReason: 'end_turn' }
+    expect(fuelShare(applyStep(shuttle('s'), step), 200)).toBe(25)
+    expect(fuelShare(shuttle('s'), 0)).toBeNull()
+    expect(plainReport('## Done\n**All** `tests` pass.\n> note')).toBe('Done All tests pass. note')
   })
 })
