@@ -102,12 +102,13 @@ export function Fold(props: { ui: UiContext; foldKey: string; text: string; widt
   )
 }
 
-/** A clock that ticks on the surface's own frame clock; a start of 0 is unknown and shows a dash. */
+/** A clock that ticks on the surface's own frame clock while it runs; an ended one is plain text, as is a start of 0, a dash. */
 export function LiveClock(props: { ui: UiContext; clockKey: string; since: number; endAt: number | null; color: string }): RenderNode {
   const { ui, since, endAt, color } = props
   const { Text } = ui.els
   if (since <= 0) return <Text color={color}>—</Text>
-  if (ui.hasClient && 'Client' in ui.els)
+  // Every client module is a live instance on the surface: one whose time no longer moves need not be.
+  if (endAt === null && ui.hasClient && 'Client' in ui.els)
     return <ui.els.Client key={props.clockKey} module="./clients/clock.tsx" props={{ since, now: ui.now, endAt, color }} />
   return <Text color={color}>{fmtTimer((endAt ?? ui.now) - since)}</Text>
 }
