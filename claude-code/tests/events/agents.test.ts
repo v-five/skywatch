@@ -31,6 +31,32 @@ describe('agents: shuttles', () => {
     await desktop.unmount()
   })
 
+  test('a resumed agent flies again as the same shuttle, and opens alone', async ($, on) => {
+    world(on)
+    let n = 0
+    on('agent.spawn', () => ({ model: 'claude-sonnet-4-5', agentId: n++ === 1 ? 's2' : 's1' }))
+    on('turn.complete', () => ({ text: '' }))
+    await $.session.start(START)
+    await $.agent.spawn(spawn('Explore', 'review the diff'))
+    await $.agent.spawn(spawn('Explore', 'review the docs'))
+    await $.turn.complete(complete('First pass.', { agentId: 's1' }))
+    await $.turn.complete(complete('Docs pass.', { agentId: 's2' }))
+    await $.agent.spawn(spawn('Explore', 'review the diff'))
+    const flying = await $.ui.mount(paneRequest('desktop'))
+    expect(await flying.findAll({ type: 'Button', key: 'shuttle-s1' })).toHaveLength(1)
+    expect(await flying.find({ type: 'Text', text: '◐ in flight' })).toBeDefined()
+    await flying.unmount()
+    await $.turn.complete(complete('Second pass.', { agentId: 's1' }))
+    const ui = await $.ui.mount(paneRequest('desktop'))
+    expect(await ui.find({ type: 'Text', text: '2 docked' })).toBeDefined()
+    await ui.press({ key: 'hangar' })
+    await ui.press({ key: 'shuttle-s1' })
+    expect(await ui.find({ type: 'Text', text: 'Second pass.' })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: 'Docs pass.' })).toBeUndefined()
+    expect(await ui.findAll({ type: 'Text', text: 'Debrief' })).toHaveLength(1)
+    await ui.unmount()
+  })
+
   test('a shuttle writes under one name, from its spawn to its landing', async ($, on) => {
     world(on)
     on('agent.spawn', () => ({ model: 'claude-sonnet-4-5', agentId: 's1' }))

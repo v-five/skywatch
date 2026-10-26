@@ -88,6 +88,21 @@ describe('the fleet', () => {
     expect(withShuttle(fleet, 's3', s => ({ ...s, steps: 9 })).find(s => s.id === 's3')?.steps).toBe(9)
   })
 
+  test('a shuttle launched again under its id replaces itself, keeping its title', () => {
+    const docked = landShuttle(shuttle('s1'), { status: 'done', at: 2000, answer: 'done' })
+    const again = newShuttle([docked, shuttle('s2')], {
+      id: 's1',
+      type: 'Explore',
+      model: 'm',
+      description: 'other',
+      prompt: 'Again',
+      spawnedAt: 3000,
+    })
+    expect(again).toMatchObject({ title: docked.title, status: 'running', endedAt: null, answer: '', brief: 'Again', spawnedAt: 3000 })
+    const fleet = addShuttle([docked, shuttle('s2')], again)
+    expect(fleet.map(s => s.id)).toEqual(['s2', 's1'])
+  })
+
   test('shows those in flight first, then the docked ones newest first', () => {
     const fleet = [
       landShuttle(shuttle('a'), { status: 'done', at: 1, answer: '' }),

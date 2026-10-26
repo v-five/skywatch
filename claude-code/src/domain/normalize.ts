@@ -173,8 +173,10 @@ function normalizeShuttle(stored: unknown): Shuttle {
   }
 }
 
+/** Older builds stored a resumed agent twice under one id: the later one stays. */
 export function normalizeShuttles(stored: unknown): Shuttle[] {
-  return listOf(stored).map(normalizeShuttle)
+  const fleet = listOf(stored).map(normalizeShuttle)
+  return fleet.filter((shuttle, i) => !shuttle.id || !fleet.slice(i + 1).some(later => later.id === shuttle.id))
 }
 
 export function normalizeProbes(stored: unknown): Probe[] {

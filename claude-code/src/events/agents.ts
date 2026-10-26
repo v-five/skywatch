@@ -1,5 +1,5 @@
 import type { Args, EngineInterface, On } from 'claude-code'
-import { addShuttle, COUNCIL_TYPES, dropProbe, isOpenTransmission, newShuttle, serverBlocksOf, shuttleWriter } from '../domain'
+import { addShuttle, COUNCIL_TYPES, dropProbe, hasShuttle, isOpenTransmission, newShuttle, serverBlocksOf, shuttleWriter } from '../domain'
 import {
   addCouncilId,
   addCouncilType,
@@ -33,7 +33,9 @@ async function launchAgent(
     await refreshStatus($, runtime)
     return
   }
-  const shuttle = newShuttle(await getShuttles($), {
+  const fleet = await getShuttles($)
+  const isResumed = hasShuttle(fleet, id)
+  const shuttle = newShuttle(fleet, {
     id,
     type: e.name ?? e.subagentType,
     model: started.model,
@@ -44,7 +46,7 @@ async function launchAgent(
   await patchShuttles($, fleet => addShuttle(fleet, shuttle))
   await noteUsed($, `agent:${e.subagentType}`)
   await patchProbes($, probes => dropProbe(probes, id))
-  await logEntry($, shuttleWriter(shuttle), `spawned · ${shuttle.type}`, 'info', id)
+  await logEntry($, shuttleWriter(shuttle), `${isResumed ? 'resumed' : 'spawned'} · ${shuttle.type}`, 'info', id)
   await refreshStatus($, runtime)
 }
 

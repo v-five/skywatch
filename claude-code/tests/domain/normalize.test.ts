@@ -96,6 +96,10 @@ describe('reading older values', () => {
 
   test('a shuttle in an unknown status has landed', () => {
     expect(normalizeShuttles([{ status: 'exploded' }, { status: 'done' }]).map(s => s.status)).toEqual(['stopped', 'done'])
+    expect(normalizeShuttles([{ id: 'a', answer: 'old' }, { id: 'b' }, { id: 'a', answer: 'new' }]).map(s => s.answer || s.id)).toEqual([
+      'b',
+      'new',
+    ])
   })
 
   test('black box entries read field by field; a cost gets its missing fields', () => {

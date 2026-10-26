@@ -15,18 +15,26 @@ const BRIEF_MAX = 600
 const WRITER_MAX = 18
 const PROBE_ACTIVE_MS = 15_000
 
-/** A shuttle at launch: its title made from the mission and numbered past the fleet's, its brief redacted and cut. */
+/**
+ * A shuttle at launch: its title made from the mission and numbered past the fleet's, its brief redacted and cut.
+ * A resumed agent launches again under its own id: the same shuttle flies again, keeping its title and its readings.
+ */
 export function newShuttle(
   fleet: readonly Shuttle[],
   spawn: { id: string; type: string; model: string; description: string; prompt: string; spawnedAt: number },
 ): Shuttle {
   const { prompt, ...rest } = spawn
+  const brief = shorten(redact(prompt), BRIEF_MAX)
+  const docked = fleet.find(shuttle => shuttle.id === spawn.id)
+  if (docked)
+    return { ...docked, model: spawn.model, brief, status: 'running', spawnedAt: spawn.spawnedAt, endedAt: null, endReason: '', answer: '' }
   const title = uniqueTitle(shuttleTitle(spawn.description, spawn.type), fleet.map(titleOf))
-  return { ...DEFAULT_SHUTTLE, ...rest, title, brief: shorten(redact(prompt), BRIEF_MAX) }
+  return { ...DEFAULT_SHUTTLE, ...rest, title, brief }
 }
 
+/** One shuttle per id: a shuttle that launches again leaves its old place for the end of the fleet. */
 export function addShuttle(fleet: readonly Shuttle[], shuttle: Shuttle): Shuttle[] {
-  return [...fleet, shuttle].slice(-SHUTTLES_MAX)
+  return [...fleet.filter(each => each.id !== shuttle.id), shuttle].slice(-SHUTTLES_MAX)
 }
 
 export function withShuttle(fleet: readonly Shuttle[], id: string, change: (shuttle: Shuttle) => Shuttle): Shuttle[] {
