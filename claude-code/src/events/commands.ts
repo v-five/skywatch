@@ -1,6 +1,6 @@
 import type { EngineInterface, On } from 'claude-code'
 import { isHazardMode } from '../core'
-import { activeTime, debriefText, withCommand, withHazards } from '../domain'
+import { activeTime, debriefText, WRITERS, withCommand, withForcefield, withHazards } from '../domain'
 import { directivesReport, loadDirectives } from '../forcefield'
 import {
   getBlackbox,
@@ -11,6 +11,8 @@ import {
   getStation,
   getTotals,
   getUsage,
+  getView,
+  logEntry,
   patchBridge,
   patchView,
   resetAll,
@@ -19,8 +21,9 @@ import { paletteReport } from './palette'
 import type { Runtime } from './runtime'
 import { hazardsNow, openPane, PANE_ID, refreshStatus, remeasure } from './status'
 
-const USAGE = 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|directives|palette|debrief]'
+const USAGE = 'Usage: /skywatch [launch|dock|recalibrate|hazards viewscreen|beacon|off|forcefield on|off|directives|palette|debrief]'
 const HAZARDS_USAGE = 'Usage: /skywatch hazards viewscreen|beacon|off'
+const FORCEFIELD_USAGE = 'Usage: /skywatch forcefield on|off'
 const LAUNCHED = 'SkyWatch launched.'
 
 /** `/skywatch hazards [mode]`: without a mode it shows this session's, with one it sets it. */
@@ -31,6 +34,22 @@ async function runHazards($: EngineInterface, runtime: Runtime, mode: string): P
   await refreshStatus($, runtime)
   $.ui.invalidate('ui.render')
   return `Hazards: ${mode}, for this session.`
+}
+
+/** `/skywatch forcefield [on|off]`: off, the directives hold and block nothing for this session. */
+async function runForcefield($: EngineInterface, runtime: Runtime, state: string): Promise<string> {
+  const isOff = (await getView($)).isForcefieldOff === true
+  if (!state) return `Force field: ${isOff ? 'off' : 'on'}. Change it with /skywatch forcefield on|off.`
+  if (state !== 'on' && state !== 'off') return FORCEFIELD_USAGE
+  if ((state === 'off') !== isOff) {
+    await patchView($, view => withForcefield(view, state === 'off'))
+    await logEntry($, WRITERS.shields, `force field ${state}`, state === 'off' ? 'error' : 'info')
+  }
+  await refreshStatus($, runtime)
+  $.ui.invalidate('ui.render')
+  return state === 'off'
+    ? 'Force field: off, for this session. Directives hold and block nothing; Claude Code decides. Turn it back on with /skywatch forcefield on.'
+    : 'Force field: on.'
 }
 
 /** `/skywatch debrief`: the session as markdown, to keep or paste into a pull request. */
@@ -78,6 +97,8 @@ async function runSkywatch($: EngineInterface, runtime: Runtime, args: string): 
       return 'SkyWatch recalibrated.'
     case 'hazards':
       return runHazards($, runtime, argument)
+    case 'forcefield':
+      return runForcefield($, runtime, argument)
     case 'debrief':
       return readDebrief($)
     case 'palette':

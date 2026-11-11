@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'claude-code/testing'
-import { heldTexts, paneRequest, START } from '../support/drive'
+import { heldTexts, paneRequest, START, skywatch } from '../support/drive'
 import { CWD, PROJECT_DIRECTIVES, runTools, shellAnswer, world } from '../support/world'
 
 describe('the force field: blocks and passes', () => {
@@ -16,6 +16,24 @@ describe('the force field: blocks and passes', () => {
     expect(await ui.find({ type: 'Text', text: ' blocked 1' })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /^blocked by directive "block @git-history" · / })).toBeDefined()
     await ui.unmount()
+  })
+
+  test('/skywatch forcefield off lets a blocked call through for the session, and on blocks it again', async ($, on) => {
+    world(on, { files: { [PROJECT_DIRECTIVES]: 'block @git-history\n' } })
+    runTools(on)
+    await $.session.start(START)
+    expect(await $.command.run(skywatch('forcefield'))).toMatchObject({ text: expect.stringContaining('Force field: on.') })
+    expect(await $.command.run(skywatch('forcefield off'))).toMatchObject({
+      text: expect.stringContaining('Force field: off, for this session.'),
+    })
+    expect(await $.tool.call({ tool: 'Bash', command: 'git push --force origin main' })).not.toMatchObject({ isError: true })
+    await $.command.run(skywatch('recalibrate'))
+    const ui = await $.ui.mount(paneRequest())
+    expect(await ui.find({ type: 'Text', text: 'off' })).toBeDefined()
+    await ui.unmount()
+    await $.command.run(skywatch('forcefield on'))
+    expect(await $.tool.call({ tool: 'Bash', command: 'git push --force origin main' })).toMatchObject({ isError: true })
+    expect(await $.command.run(skywatch('forcefield maybe'))).toMatchObject({ text: 'Usage: /skywatch forcefield on|off' })
   })
 
   test('block @secrets refuses a dotenv read', async ($, on) => {

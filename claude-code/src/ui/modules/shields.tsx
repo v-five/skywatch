@@ -57,7 +57,7 @@ function Tallies({ ui, parts }: { ui: UiContext; parts: readonly TallyPart[] }):
 
 /** Protocols are Claude Code's rules; the decider answers prompts; the force field is what directives held. */
 function Verdicts({ ui, data }: ModuleProps): RenderNode {
-  const { Box } = ui.els
+  const { Box, Text } = ui.els
   const summary = shieldsSummary(data.shields)
   const { held } = data.shields
   return (
@@ -82,15 +82,19 @@ function Verdicts({ ui, data }: ModuleProps): RenderNode {
         />
       </Row>
       <Row ui={ui} label="Force field">
-        <Tallies
-          ui={ui}
-          parts={[
-            { role: 'cleared', label: 'cleared', count: held.ran },
-            { role: 'stopped', label: 'stopped', count: held.refused },
-            { role: 'waiting', label: 'waiting', count: data.held ? 1 : 0 },
-            ...(data.hasBlockDirective ? [{ role: 'blocked' as const, label: 'blocked', count: held.blocked }] : []),
-          ]}
-        />
+        {ui.view.isForcefieldOff ? (
+          <Text color={ui.colors.alert}>off</Text>
+        ) : (
+          <Tallies
+            ui={ui}
+            parts={[
+              { role: 'cleared', label: 'cleared', count: held.ran },
+              { role: 'stopped', label: 'stopped', count: held.refused },
+              { role: 'waiting', label: 'waiting', count: data.held ? 1 : 0 },
+              ...(data.hasBlockDirective ? [{ role: 'blocked' as const, label: 'blocked', count: held.blocked }] : []),
+            ]}
+          />
+        )}
       </Row>
     </Box>
   )

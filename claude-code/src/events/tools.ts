@@ -26,6 +26,7 @@ import {
   getCouncil,
   getJump,
   getShields,
+  getView,
   logEntry,
   noteAdvice,
   noteCall,
@@ -84,8 +85,9 @@ async function markAsked($: EngineInterface, runtime: Runtime, id: string, held:
   $.ui.invalidate('ui.render')
 }
 
-/** Measures a risky call before it runs, so tool.check can put it to the prompt. */
+/** Measures a risky call before it runs, so tool.check can put it to the prompt; with the force field off, none is. */
 async function holdCall($: EngineInterface, runtime: Runtime, e: Args<'tool.call'>): Promise<void> {
+  if ((await getView($)).isForcefieldOff) return
   const draft = await holdFor($, { tool: e.tool, input: e, places: runtime.places }, runtime.directives.directives)
   if (draft) runtime.held.set(e.tool_use_id, { ...draft, who: await whoIs($, e.agentId) })
 }

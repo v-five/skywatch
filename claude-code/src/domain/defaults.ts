@@ -89,6 +89,7 @@ export const DEFAULT_VIEW: View = {
   unfolded: [],
   entriesShown: BLACKBOX_PAGE,
   hazards: null,
+  isForcefieldOff: false,
 }
 
 export const DEFAULT_COUNCIL_ROSTER: CouncilRoster = { councilTypes: [] }

@@ -93,7 +93,7 @@ One more line, `compact at <step or N%>` (`compact at ion-storm`, `compact at 85
 
 The last directive that matches wins: SkyWatch's defaults come first, then your file, then the project's. A held `rm` whose targets are all inside `/tmp` or `$TMPDIR` passes unless a directive names the command. The Force field row counts blocked commands once you have a `block` directive. In auto mode, Claude Code's classifier may answer a held command instead of you; only `block` can't be answered.
 
-`/skywatch directives` lists the directives in force, where each came from, and any line it couldn't read.
+`/skywatch directives` lists the directives in force, where each came from, and any line it couldn't read. `/skywatch forcefield off` sets them all aside for this session, and the Force field row reads `off` until `/skywatch forcefield on`; a `compact at` line still applies.
 
 ## Commands
 
@@ -103,6 +103,7 @@ The last directive that matches wins: SkyWatch's defaults come first, then your 
 | `/skywatch dock` | close it |
 | `/skywatch recalibrate` | clear the shuttles, checks, transmissions, the black box and the jump; fuel, power and compactions stay |
 | `/skywatch hazards viewscreen\|beacon\|off` | change the hazard scale for this session; without a value, show it |
+| `/skywatch forcefield on\|off` | turn the force field off for this session: no directive holds or blocks, and Claude Code decides; `on` brings it back. Without a value, show it |
 | `/skywatch directives` | reload and list the directives |
 | `/skywatch debrief` | the session as markdown, to keep or paste into a pull request: fuel, the flight plan, the shuttles, the shields and the cargo |
 | `/skywatch palette` | list each surface's palette, the colours the palette files set, and lines they could not read |

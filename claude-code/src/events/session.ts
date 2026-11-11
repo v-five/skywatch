@@ -13,8 +13,8 @@ async function startSession($: EngineInterface, runtime: Runtime): Promise<void>
   runtime.paletteFiles = await loadPaletteFiles($, home).catch(() => runtime.paletteFiles)
   await $.command.register({
     name: 'skywatch',
-    description: 'SkyWatch, a starbase for your session: launch, dock, recalibrate, hazards, directives, palette, debrief',
-    argumentHint: '[launch|dock|recalibrate|hazards viewscreen|beacon|off|directives|palette|debrief]',
+    description: 'SkyWatch, a starbase for your session: launch, dock, recalibrate, hazards, forcefield, directives, palette, debrief',
+    argumentHint: '[launch|dock|recalibrate|hazards viewscreen|beacon|off|forcefield on|off|directives|palette|debrief]',
   })
   await migrateState($)
   // A command still marked running belongs to a process that has gone.

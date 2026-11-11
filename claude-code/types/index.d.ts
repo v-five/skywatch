@@ -195,6 +195,8 @@ export type View = {
   entriesShown: number
   /** This session's /skywatch hazards choice; null follows the setting. */
   hazards: HazardMode | null
+  /** This session's /skywatch forcefield off: the directives hold and block nothing. */
+  isForcefieldOff?: boolean
 }
 
 export type CouncilRoster = { councilTypes: string[] }

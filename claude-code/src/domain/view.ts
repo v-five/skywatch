@@ -53,9 +53,14 @@ export function withEntriesShown(view: View, count: number): View {
   return { ...view, entriesShown: count }
 }
 
-/** A recalibrated view keeps only this session's hazards choice. */
+/** A recalibrated view keeps only this session's choices: its hazards and whether the force field is off. */
 export function viewAfterReset(view: View): View {
-  return { ...DEFAULT_VIEW, hazards: view.hazards }
+  return { ...DEFAULT_VIEW, hazards: view.hazards, isForcefieldOff: view.isForcefieldOff }
+}
+
+/** This session's /skywatch forcefield choice. */
+export function withForcefield(view: View, isOff: boolean): View {
+  return { ...view, isForcefieldOff: isOff }
 }
 
 /** This session's hazards choice, over the setting. */
